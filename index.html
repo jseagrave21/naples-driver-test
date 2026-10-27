@@ -7,8 +7,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>NSA Naples Driver's License Exam Prep (48Q / Max 2 Misses)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PDF.js for automatic & manual client-side cropping from Drivers Study Guide.pdf -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body {
@@ -48,12 +46,8 @@
         </div>
       </div>
 
-      <!-- Mode Switcher & PDF Uploader -->
+      <!-- Mode Switcher -->
       <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-        <button onclick="openPdfModal()" id="pdfStatusBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5" title="Switch between PDF Scans and Built-in Crisp Vectors">
-          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <span id="pdfBtnLabel">Graphics: Vectors</span>
-        </button>
         <button onclick="switchTab('quiz')" id="tabQuizBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition">
           Test Simulator
         </button>
@@ -273,43 +267,6 @@
     </section>
 
   </main>
-
-  <!-- ==================== MODAL: LOAD PDF / GRAPHICS SWITCHER ==================== -->
-  <div id="pdfModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl flex flex-col gap-4">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <h3 class="text-base sm:text-lg font-extrabold text-white">Sign Graphics Mode (Vectors vs. PDF Scans)</h3>
-          <p class="text-xs text-slate-400 mt-0.5">
-            Switch between built-in high-contrast vector signs and exact cropped images from <code class="text-blue-400">Drivers Study Guide.pdf</code>.
-          </p>
-        </div>
-        <button onclick="closePdfModal()" class="text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
-      </div>
-
-      <label class="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-950/60 flex flex-col items-center gap-2">
-        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-        <span class="text-xs sm:text-sm font-bold text-slate-200">Tap to load <span class="text-blue-400">Drivers Study Guide.pdf</span> manually</span>
-        <span class="text-[11px] text-slate-400">Uses smart color-bounding-box detection so no sign is ever clipped</span>
-        <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="handlePdfUpload(event)" />
-      </label>
-
-      <div id="pdfCropStatus" class="hidden text-xs font-semibold px-3.5 py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300">
-        Processing PDF...
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-400 font-medium">Active Mode:</span>
-          <button onclick="setRenderPreference('svg')" id="prefSvgBtn" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white">Crisp Vectors</button>
-          <button onclick="setRenderPreference('pdf')" id="prefPdfBtn" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-400" disabled>PDF Scans</button>
-        </div>
-        <button onclick="closePdfModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">
-          Done
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- FOOTER -->
   <footer class="border-t border-slate-900 py-3 px-4 text-center text-[11px] text-slate-500">
@@ -549,13 +506,13 @@
         case "warn_drawbridge":
           return triangleWrap(`<path d="M32,84 L48,84 L66,60 M74,84 L88,84" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/><path d="M48,88 Q60,94 74,88" fill="none" stroke="#111827" stroke-width="3"/>`, triBg);
         case "warn_verges":
-          return triangleWrap(`<path d="M30,82 L58,82 L66,88 L90,88" fill="none" stroke="#111827" stroke-width="4"/><g transform="translate(58,66) rotate(18)"><rect x="-14" y="-8" width="28" height="14" rx="3" fill="#111827"/></g>`, triBg);
+          return triangleWrap(`<path d="M28,80 L56,80 L62,88 L92,88" fill="none" stroke="#111827" stroke-width="4.5"/><g transform="translate(54,66) rotate(20)"><rect x="-14" y="-8" width="28" height="13" rx="3" fill="#111827"/><circle cx="-8" cy="7" r="3" fill="#111827"/><circle cx="8" cy="7" r="3" fill="#111827"/></g><circle cx="72" cy="82" r="2" fill="#111827"/><circle cx="79" cy="84" r="2" fill="#111827"/>`, triBg);
         case "warn_slippery":
-          return triangleWrap(`<rect x="46" y="50" width="28" height="16" rx="3" fill="#111827"/><path d="M42,86 Q55,74 48,66 M78,86 Q65,74 72,66" fill="none" stroke="#111827" stroke-width="3.5" stroke-linecap="round"/>`, triBg);
+          return triangleWrap(`<rect x="46" y="48" width="28" height="15" rx="3" fill="#111827"/><circle cx="51" cy="64" r="3" fill="#111827"/><circle cx="69" cy="64" r="3" fill="#111827"/><path d="M40,86 Q56,75 48,66 M76,86 Q62,75 70,66" fill="none" stroke="#111827" stroke-width="3.5" stroke-linecap="round"/>`, triBg);
         case "warn_downgrade":
-          return triangleWrap(`<polygon points="30,62 90,88 30,88" fill="#111827"/><text x="62" y="66" font-size="15" font-weight="900" fill="#111827" text-anchor="middle">10%</text>`, triBg);
+          return triangleWrap(`<polygon points="28,56 90,88 28,88" fill="#111827"/><g transform="translate(64,62) rotate(26)"><text x="0" y="0" font-size="15" font-weight="900" fill="#111827" text-anchor="middle">10%</text></g>`, triBg);
         case "warn_upgrade":
-          return triangleWrap(`<polygon points="30,88 90,62 90,88" fill="#111827"/><text x="56" y="66" font-size="15" font-weight="900" fill="#111827" text-anchor="middle">10%</text>`, triBg);
+          return triangleWrap(`<polygon points="30,88 92,56 92,88" fill="#111827"/><g transform="translate(56,62) rotate(-26)"><text x="0" y="0" font-size="15" font-weight="900" fill="#111827" text-anchor="middle">10%</text></g>`, triBg);
         case "warn_narrows_both":
           return triangleWrap(`<path d="M42,88 L42,74 L52,60 L52,46 M78,88 L78,74 L68,60 L68,46" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/>`, triBg);
         case "warn_narrows_l":
@@ -594,21 +551,21 @@
       if (t === "rr_single") {
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
           <g transform="translate(60,60)">
-            ${crossbuckArm(28)}
-            ${crossbuckArm(-28)}
+            ${crossbuckArm(26)}
+            ${crossbuckArm(-26)}
           </g>
         </svg>`;
       }
       if (t === "rr_multi") {
-        // Two stacked St. Andrew's X crossbucks with pointed red tips and white inner bars
+        // Two stacked St. Andrew's X crossbucks matching the exact overlap on the study guide
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
           <!-- Upper X Crossbuck -->
-          <g transform="translate(60,34) scale(0.78)">
+          <g transform="translate(60,36) scale(0.82)">
             ${crossbuckArm(26)}
             ${crossbuckArm(-26)}
           </g>
           <!-- Lower X Crossbuck -->
-          <g transform="translate(60,76) scale(1.02)">
+          <g transform="translate(60,72) scale(1.04)">
             ${crossbuckArm(26)}
             ${crossbuckArm(-26)}
           </g>
@@ -973,211 +930,7 @@
       return triangleWrap(``);
     }
 
-    // ============================================================================
-    // SMART PDF SLICER (COLOR-BOUNDING-BOX DETECTOR FOR P1 + EXACT LAYOUT FOR P2)
-    // ============================================================================
-    const pdfCroppedDataUrls = {}; // id -> dataURL
-    let renderPreference = 'svg'; // 'svg' or 'pdf'
-
-    // Exact measured coordinates on Page 2 (normalized 0.0 -> 1.0)
-    const P2_COLS_8 = [
-      [0.012, 0.114], [0.124, 0.238], [0.248, 0.362], [0.374, 0.488],
-      [0.498, 0.612], [0.623, 0.742], [0.753, 0.867], [0.876, 0.986]
-    ];
-    const P2_ROWS_6 = [
-      [0.002, 0.060], // Row 1
-      [0.112, 0.191], // Row 2
-      [0.236, 0.315], // Row 3
-      [0.358, 0.439], // Row 4
-      [0.482, 0.563], // Row 5
-      [0.606, 0.686]  // Row 6
-    ];
-    const P2_ROW_7_COLS = [
-      [0.008, 0.150], [0.168, 0.315], [0.332, 0.485],
-      [0.500, 0.652], [0.665, 0.818], [0.830, 0.975]
-    ];
-    const P2_ROW_7_Y = [0.743, 0.782];
-    const P2_ROW_8_COLS = [
-      [0.015, 0.110], [0.162, 0.252], [0.308, 0.395],
-      [0.432, 0.555], [0.578, 0.692], [0.718, 0.830], [0.855, 0.975]
-    ];
-    const P2_ROW_8_Y = [0.838, 0.918];
-
-    function openPdfModal() {
-      document.getElementById('pdfModal').classList.remove('hidden');
-    }
-    function closePdfModal() {
-      document.getElementById('pdfModal').classList.add('hidden');
-    }
-    function setRenderPreference(pref) {
-      if (pref === 'pdf' && Object.keys(pdfCroppedDataUrls).length === 0) return;
-      renderPreference = pref;
-      document.getElementById('prefSvgBtn').className = pref === 'svg'
-        ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white'
-        : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300';
-      document.getElementById('prefPdfBtn').className = pref === 'pdf'
-        ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white'
-        : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300';
-      document.getElementById('pdfBtnLabel').textContent = pref === 'pdf'
-        ? 'Graphics: PDF Scans ✓'
-        : 'Graphics: Vectors';
-      if (currentQuestion) renderCurrentQuestion();
-      renderStudyGrid();
-    }
-
-    // Smart Page 1 color-bounding-box detector:
-    // Every single sign on Page 1 has a bright Red, Yellow, or Blue outer shape,
-    // while all English text captions underneath are 100% grayscale black text.
-    // Locking onto the colored pixels guarantees 0% clipped signs and 0% text bleed!
-    function cropPage1SignSmart(ctx, canvasW, canvasH, row, col) {
-      const topHeader = canvasH * 0.032;
-      const gridH = canvasH - topHeader;
-      const cellW = canvasW / 8.0;
-      const cellH = gridH / 8.0;
-
-      // Search window covering the cell (allowing generous top/side margin for tall signs like Sign #10)
-      const sx0 = Math.max(0, Math.floor(col * cellW + cellW * 0.02));
-      const sx1 = Math.min(canvasW - 1, Math.ceil((col + 1) * cellW - cellW * 0.02));
-      const sy0 = Math.max(0, Math.floor(topHeader + row * cellH - cellH * 0.08));
-      const sy1 = Math.min(canvasH - 1, Math.ceil(topHeader + (row + 0.72) * cellH));
-
-      const sw = sx1 - sx0;
-      const sh = sy1 - sy0;
-      const imgData = ctx.getImageData(sx0, sy0, sw, sh).data;
-
-      let minX = sw, maxX = 0, minY = sh, maxY = 0;
-      let foundColor = false;
-
-      for (let py = 0; py < sh; py++) {
-        for (let px = 0; px < sw; px++) {
-          const idx = (py * sw + px) * 4;
-          const r = imgData[idx], g = imgData[idx + 1], b = imgData[idx + 2];
-          const maxC = Math.max(r, g, b);
-          const minC = Math.min(r, g, b);
-          const sat = maxC - minC;
-          // Detect Red, Yellow, or Blue sign pixels
-          if (sat > 38 && maxC > 75) {
-            if (px < minX) minX = px;
-            if (px > maxX) maxX = px;
-            if (py < minY) minY = py;
-            if (py > maxY) maxY = py;
-            foundColor = true;
-          }
-        }
-      }
-
-      let cropX, cropY, cropW, cropH;
-      if (foundColor && (maxX - minX) > 10 && (maxY - minY) > 10) {
-        // Add small padding around the detected colored sign graphic
-        const padX = Math.round((maxX - minX) * 0.10);
-        const padTop = Math.round((maxY - minY) * 0.10);
-        const padBot = Math.round((maxY - minY) * 0.05);
-        cropX = Math.max(0, sx0 + minX - padX);
-        cropY = Math.max(0, sy0 + minY - padTop);
-        const rightEdge = Math.min(canvasW, sx0 + maxX + padX);
-        const botEdge = Math.min(canvasH, sy0 + maxY + padBot);
-        cropW = rightEdge - cropX;
-        cropH = botEdge - cropY;
-      } else {
-        // Fallback if a custom PDF is monochrome
-        cropX = Math.floor(col * cellW + cellW * 0.05);
-        cropY = Math.floor(topHeader + row * cellH);
-        cropW = Math.floor(cellW * 0.90);
-        cropH = Math.floor(cellH * 0.56);
-      }
-
-      const outCanvas = document.createElement('canvas');
-      outCanvas.width = cropW;
-      outCanvas.height = cropH;
-      outCanvas.getContext('2d').drawImage(ctx.canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-      return outCanvas.toDataURL('image/png');
-    }
-
-    function cropPage2SignExact(ctx, canvasW, canvasH, sign) {
-      let xRange, yRange;
-      if (sign.row < 6) {
-        xRange = P2_COLS_8[sign.col];
-        yRange = P2_ROWS_6[sign.row];
-      } else if (sign.row === 6) {
-        xRange = P2_ROW_7_COLS[sign.col];
-        yRange = P2_ROW_7_Y;
-      } else {
-        xRange = P2_ROW_8_COLS[sign.col];
-        yRange = P2_ROW_8_Y;
-      }
-
-      const cropX = Math.floor(xRange[0] * canvasW);
-      const cropY = Math.floor(yRange[0] * canvasH);
-      const cropW = Math.floor((xRange[1] - xRange[0]) * canvasW);
-      const cropH = Math.floor((yRange[1] - yRange[0]) * canvasH);
-
-      const outCanvas = document.createElement('canvas');
-      outCanvas.width = cropW;
-      outCanvas.height = cropH;
-      outCanvas.getContext('2d').drawImage(ctx.canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-      return outCanvas.toDataURL('image/png');
-    }
-
-    async function processPdfBuffer(arrayBuf) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
-
-      for (let pageNum = 1; pageNum <= Math.min(2, pdf.numPages); pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale: 2.5 });
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        const ctx = canvas.getContext('2d');
-        await page.render({ canvasContext: ctx, viewport }).promise;
-
-        const pageSigns = SIGNS_DB.filter(s => s.page === pageNum);
-        for (const s of pageSigns) {
-          if (pageNum === 1) {
-            pdfCroppedDataUrls[s.id] = cropPage1SignSmart(ctx, canvas.width, canvas.height, s.row, s.col);
-          } else {
-            pdfCroppedDataUrls[s.id] = cropPage2SignExact(ctx, canvas.width, canvas.height, s);
-          }
-        }
-      }
-
-      document.getElementById('prefPdfBtn').disabled = false;
-      setRenderPreference('pdf');
-    }
-
-    async function handlePdfUpload(event) {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      const statusEl = document.getElementById('pdfCropStatus');
-      statusEl.classList.remove('hidden');
-      statusEl.textContent = "Smart-cropping all 125 sign icons from PDF...";
-
-      try {
-        const arrayBuf = await file.arrayBuffer();
-        await processPdfBuffer(arrayBuf);
-        statusEl.textContent = "Success! All 125 signs smart-cropped with zero clipping.";
-      } catch (err) {
-        statusEl.textContent = "Could not parse PDF file. Built-in vector signs remain active.";
-      }
-    }
-
-    // Automatically load Drivers Study Guide.pdf if present in the same GitHub Pages repo!
-    async function tryAutoLoadRepoPdf() {
-      try {
-        const res = await fetch('./Drivers%20Study%20Guide.pdf');
-        if (res.ok) {
-          const buf = await res.arrayBuffer();
-          await processPdfBuffer(buf);
-        }
-      } catch (_) {
-        // Silently stay on crisp built-in SVG vectors if offline / local file
-      }
-    }
-
     function getSignVisualHTML(sign) {
-      if (renderPreference === 'pdf' && pdfCroppedDataUrls[sign.id]) {
-        return `<img src="${pdfCroppedDataUrls[sign.id]}" alt="Road Sign" class="w-full h-full object-contain rounded-xl bg-white p-1" />`;
-      }
       return generateSignSVG(sign);
     }
 
@@ -1557,7 +1310,6 @@
 
     window.onload = () => {
       startNewSession('exam48');
-      tryAutoLoadRepoPdf();
     };
   </script>
 </body>
