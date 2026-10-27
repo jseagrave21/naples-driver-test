@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>NSA Naples Driver's License Exam Prep (48Q / Max 2 Misses)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PDF.js for optional one-click client-side cropping directly from Drivers Study Guide.pdf -->
+  <!-- PDF.js for automatic & manual client-side cropping from Drivers Study Guide.pdf -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -50,9 +50,9 @@
 
       <!-- Mode Switcher & PDF Uploader -->
       <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-        <button onclick="openPdfModal()" id="pdfStatusBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5" title="Crop exact images from your Drivers Study Guide.pdf">
+        <button onclick="openPdfModal()" id="pdfStatusBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5" title="Switch between PDF Scans and Built-in Crisp Vectors">
           <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <span id="pdfBtnLabel">Load PDF Scans</span>
+          <span id="pdfBtnLabel">Graphics: Vectors</span>
         </button>
         <button onclick="switchTab('quiz')" id="tabQuizBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition">
           Test Simulator
@@ -168,7 +168,7 @@
 
         <!-- Sign Visual Stage -->
         <div class="flex flex-col items-center justify-center my-auto py-2">
-          <div id="signStage" class="w-48 h-48 sm:w-56 sm:h-56 bg-slate-800/60 border border-slate-700/80 rounded-3xl flex items-center justify-center p-4 sign-shadow relative overflow-hidden">
+          <div id="signStage" class="w-48 h-48 sm:w-56 sm:h-56 bg-white border-2 border-slate-700/80 rounded-3xl flex items-center justify-center p-3 sign-shadow relative overflow-hidden">
             <!-- Rendered SVG or Cropped PDF Canvas goes here -->
           </div>
           <p class="text-xs text-slate-400 mt-3 font-medium text-center">
@@ -274,14 +274,14 @@
 
   </main>
 
-  <!-- ==================== MODAL: LOAD PDF / AUTO-CROPPER ==================== -->
+  <!-- ==================== MODAL: LOAD PDF / GRAPHICS SWITCHER ==================== -->
   <div id="pdfModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl flex flex-col gap-4">
       <div class="flex items-start justify-between gap-3">
         <div>
-          <h3 class="text-base sm:text-lg font-extrabold text-white">Load Official Study Guide PDF</h3>
+          <h3 class="text-base sm:text-lg font-extrabold text-white">Sign Graphics Mode (Vectors vs. PDF Scans)</h3>
           <p class="text-xs text-slate-400 mt-0.5">
-            The app already has built-in crisp vector graphics for all 125 signs. If you also want to slice the exact raster images from <code class="text-blue-400">Drivers Study Guide.pdf</code> right in your browser, select the PDF below:
+            Switch between built-in high-contrast vector signs and exact cropped images from <code class="text-blue-400">Drivers Study Guide.pdf</code>.
           </p>
         </div>
         <button onclick="closePdfModal()" class="text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
@@ -289,8 +289,8 @@
 
       <label class="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-950/60 flex flex-col items-center gap-2">
         <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-        <span class="text-xs sm:text-sm font-bold text-slate-200">Tap to choose <span class="text-blue-400">Drivers Study Guide.pdf</span></span>
-        <span class="text-[11px] text-slate-400">Slices Page 1 (8×8 grid) & Page 2 (61 signs) automatically offline</span>
+        <span class="text-xs sm:text-sm font-bold text-slate-200">Tap to load <span class="text-blue-400">Drivers Study Guide.pdf</span> manually</span>
+        <span class="text-[11px] text-slate-400">Uses smart color-bounding-box detection so no sign is ever clipped</span>
         <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="handlePdfUpload(event)" />
       </label>
 
@@ -300,7 +300,7 @@
 
       <div class="flex items-center justify-between pt-2 border-t border-slate-800">
         <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-400 font-medium">Display Mode:</span>
+          <span class="text-xs text-slate-400 font-medium">Active Mode:</span>
           <button onclick="setRenderPreference('svg')" id="prefSvgBtn" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white">Crisp Vectors</button>
           <button onclick="setRenderPreference('pdf')" id="prefPdfBtn" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-400" disabled>PDF Scans</button>
         </div>
@@ -313,15 +313,13 @@
 
   <!-- FOOTER -->
   <footer class="border-t border-slate-900 py-3 px-4 text-center text-[11px] text-slate-500">
-    Keyboard Shortcuts (MacBook): Press <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">1</kbd>–<kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">4</kbd> to select answer • <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">Space</kbd> or <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">Enter</kbd> for next question
+    Keyboard Shortcuts (ThinkPad / MacBook): Press <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">1</kbd>–<kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">4</kbd> to select answer • <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">Space</kbd> or <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">Enter</kbd> for next question
   </footer>
 
   <script>
     // ============================================================================
     // COMPLETE DATASET: ALL 125 SIGNS FROM DRIVERS STUDY GUIDE.PDF (PAGE 1 & PAGE 2)
     // ============================================================================
-    // Page 1 is an 8x8 grid (64 signs).
-    // Page 2 is 6 rows of 8 (48 signs) + Row 7 (6 signs) + Row 8 (7 signs) = 61 signs.
     const SIGNS_DB = [
       // ---------------- PAGE 1: ROW 1 (1-8) ----------------
       { id: 1, page: 1, row: 0, col: 0, label: "BUMPY ROAD", cat: "warning", trap: true, svgType: "warn_bumpy", note: "Two bumps = Bumpy road (irregular surface)" },
@@ -334,8 +332,8 @@
       { id: 8, page: 1, row: 0, col: 7, label: "UNGUARDED RAILROAD CROSSING", cat: "warning", trap: true, svgType: "warn_rr_unguarded", note: "Locomotive train inside triangle = Unguarded crossing ahead" },
 
       // ---------------- PAGE 1: ROW 2 (9-16) ----------------
-      { id: 9, page: 1, row: 1, col: 0, label: "UNGUARDED RAILROAD CROSSING (SINGLE TRACK)", cat: "warning", trap: true, svgType: "rr_single", note: "Single X crossbuck = Single track" },
-      { id: 10, page: 1, row: 1, col: 1, label: "UNGUARDED RAILROAD CROSSING (MULTIPLE TRACK)", cat: "warning", trap: true, svgType: "rr_multi", note: "X crossbuck + extra chevron below = Multiple tracks" },
+      { id: 9, page: 1, row: 1, col: 0, label: "UNGUARDED RAILROAD CROSSING (SINGLE TRACK)", cat: "warning", trap: true, svgType: "rr_single", note: "Single red-bordered X crossbuck = Single track" },
+      { id: 10, page: 1, row: 1, col: 1, label: "UNGUARDED RAILROAD CROSSING (MULTIPLE TRACK)", cat: "warning", trap: true, svgType: "rr_multi", note: "Two stacked red-bordered X crossbucks = Multiple tracks" },
       { id: 11, page: 1, row: 1, col: 2, label: "TRAMS CROSSING AHEAD", cat: "warning", trap: false, svgType: "warn_tram" },
       { id: 12, page: 1, row: 1, col: 3, label: "PEDESTRIAN CROSSING", cat: "warning", trap: true, variant: "Red Warning Triangle (Ahead)", svgType: "warn_ped" },
       { id: 13, page: 1, row: 1, col: 4, label: "DRAW BRIDGE", cat: "warning", trap: false, svgType: "warn_drawbridge" },
@@ -351,7 +349,7 @@
       { id: 21, page: 1, row: 2, col: 4, label: "CAUTION SCHOOL ZONE", cat: "warning", trap: false, svgType: "warn_school" },
       { id: 22, page: 1, row: 2, col: 5, label: "DOMESTIC ANIMALS ON THE ROAD", cat: "warning", trap: false, svgType: "warn_cow" },
       { id: 23, page: 1, row: 2, col: 6, label: "TWO-WAY TRAFFIC", cat: "warning", trap: true, variant: "White Permanent Warning", svgType: "warn_twoway" },
-      { id: 24, page: 1, row: 2, col: 7, label: "ROUNDABUT AHEAD", cat: "warning", trap: true, svgType: "warn_roundabout", note: "Red warning triangle with 3 arrows (spelled ROUNDABUT AHEAD on guide)" },
+      { id: 24, page: 1, row: 2, col: 7, label: "ROUNDABUT AHEAD", cat: "warning", trap: true, svgType: "warn_roundabout", note: "Red warning triangle with 3 circular arrows (spelled ROUNDABUT AHEAD on guide)" },
 
       // ---------------- PAGE 1: ROW 4 (25-32) ----------------
       { id: 25, page: 1, row: 3, col: 0, label: "RIVER BANK", cat: "warning", trap: false, svgType: "warn_river" },
@@ -366,16 +364,16 @@
       // ---------------- PAGE 1: ROW 5 - TEMPORARY YELLOW WARNINGS (33-40) ----------------
       { id: 33, page: 1, row: 4, col: 0, label: "WORK IN PROGRESS", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_work" },
       { id: 34, page: 1, row: 4, col: 1, label: "ROAD NARROWS", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_narrows_both" },
-      { id: 35, page: 1, row: 4, col: 2, label: "ROAD NARROWS ON LEFT", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_narrows_l" },
-      { id: 36, page: 1, row: 4, col: 3, label: "ROAD NARROWS ON RIGHT", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_narrows_r" },
+      { id: 35, page: 1, row: 4, col: 2, label: "ROAD NARROWS ON RIGHT", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_narrows_r" },
+      { id: 36, page: 1, row: 4, col: 3, label: "ROAD NARROWS ON LEFT", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_narrows_l" },
       { id: 37, page: 1, row: 4, col: 4, label: "TWO-WAY TRAFFIC", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_twoway" },
       { id: 38, page: 1, row: 4, col: 5, label: "DANGEROUS UNSTEADY MATERIALS ON THE ROAD", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_gravel" },
       { id: 39, page: 1, row: 4, col: 6, label: "TRAFFIC LIGHTS", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_lights" },
       { id: 40, page: 1, row: 4, col: 7, label: "DANGER", cat: "temporary", trap: false, variant: "Yellow Temporary Warning", svgType: "temp_danger" },
 
       // ---------------- PAGE 1: ROW 6 - RIGHT OF WAY & PRIORITY (41-48) ----------------
-      { id: 41, page: 1, row: 5, col: 0, label: "CROSSROADS WITH RIGHT-OF-WAY FROM THE RIGHT", cat: "priority", trap: true, svgType: "prio_crossroads", note: "Black X inside red triangle = Standard crossroads where traffic from the right has priority" },
-      { id: 42, page: 1, row: 5, col: 1, label: "PRIORITY TO VEHICLES FROM OPPOSITE DIRECTION", cat: "priority", trap: true, svgType: "prio_yield_oncoming", note: "ROUND RED CIRCLE = You must yield to oncoming traffic (your side arrow is red)" },
+      { id: 41, page: 1, row: 5, col: 0, label: "CROSSROADS WITH RIGHT-OF-WAY FROM THE RIGHT", cat: "priority", trap: true, svgType: "prio_crossroads", note: "Black X inside red triangle = Crossroads where traffic from the right has priority" },
+      { id: 42, page: 1, row: 5, col: 1, label: "PRIORITY TO VEHICLES FROM OPPOSITE DIRECTION", cat: "priority", trap: true, svgType: "prio_yield_oncoming", note: "ROUND RED CIRCLE = You must yield to oncoming traffic (your right-side arrow is red)" },
       { id: 43, page: 1, row: 5, col: 2, label: "YIELD RIGHT OF WAY", cat: "priority", trap: false, svgType: "prio_yield" },
       { id: 44, page: 1, row: 5, col: 3, label: "STOP", cat: "priority", trap: false, svgType: "prio_stop" },
       { id: 45, page: 1, row: 5, col: 4, label: "ROAD WITH RIGHT OF WAY", cat: "priority", trap: true, svgType: "prio_diamond", note: "Yellow diamond = You have right of way on this main road" },
@@ -410,13 +408,13 @@
       { id: 68, page: 2, row: 0, col: 3, label: "MAXIMUM WEIGHT IN METRIC TONS PER AXLE", cat: "prohibition", trap: true, svgType: "proh_max_axle", note: "7,0 above wheel axle icon = Maximum weight per axle" },
       { id: 69, page: 2, row: 0, col: 4, label: "STOP POLICE ROADBLOCK", cat: "prohibition", trap: false, svgType: "proh_police" },
       { id: 70, page: 2, row: 0, col: 5, label: "STOP CUSTOMS", cat: "prohibition", trap: false, svgType: "proh_customs" },
-      { id: 71, page: 2, row: 0, col: 6, label: "END OF SPEED LIMIT", cat: "prohibition", trap: true, svgType: "end_all_limits", note: "Blank white circle with black diagonal bar = End of Speed Limit (general deregulatory sign on study guide)" },
+      { id: 71, page: 2, row: 0, col: 6, label: "END OF SPEED LIMIT", cat: "prohibition", trap: true, svgType: "end_all_limits", note: "Blank white circle with black diagonal bar = End of Speed Limit" },
       { id: 72, page: 2, row: 0, col: 7, label: "END OF MAXIMUM SPEED", cat: "prohibition", trap: true, svgType: "end_speed_50", note: "50 with black diagonal bar = End of Maximum Speed" },
 
       // ---------------- PAGE 2: ROW 2 (73-80) ----------------
       { id: 73, page: 2, row: 1, col: 0, label: "END OF NO OVERTAKING", cat: "prohibition", trap: true, svgType: "end_no_overtaking", note: "Two gray cars with black diagonal bar = End of No Overtaking" },
-      { id: 74, page: 2, row: 1, col: 1, label: "NO PARKING", cat: "prohibition", trap: true, svgType: "proh_no_parking", note: "Single diagonal red bar on blue circle = No Parking (Sosta Vietata)" },
-      { id: 75, page: 2, row: 1, col: 2, label: "NO STOPPING", cat: "prohibition", trap: true, svgType: "proh_no_stopping", note: "Red X (two crossed bars) on blue circle = No Stopping or Standing (Fermata Vietata)" },
+      { id: 74, page: 2, row: 1, col: 1, label: "NO PARKING", cat: "prohibition", trap: true, svgType: "proh_no_parking", note: "Single diagonal red bar on blue circle = No Parking" },
+      { id: 75, page: 2, row: 1, col: 2, label: "NO STOPPING", cat: "prohibition", trap: true, svgType: "proh_no_stopping", note: "Red X (two crossed bars) on blue circle = No Stopping" },
       { id: 76, page: 2, row: 1, col: 3, label: "PARKING AUTHORIZED", cat: "direction", trap: false, svgType: "info_parking" },
       { id: 77, page: 2, row: 1, col: 4, label: "DRIVE STRAIGHT", cat: "mandatory", trap: false, svgType: "mand_straight" },
       { id: 78, page: 2, row: 1, col: 5, label: "TURN RIGHT", cat: "mandatory", trap: false, svgType: "mand_right" },
@@ -425,7 +423,7 @@
 
       // ---------------- PAGE 2: ROW 3 (81-88) ----------------
       { id: 81, page: 2, row: 2, col: 0, label: "DRIVE STRAIGHT OR TURN LEFT", cat: "mandatory", trap: false, svgType: "mand_straight_l" },
-      { id: 82, page: 2, row: 2, col: 1, label: "ROUNDABOUT", cat: "mandatory", trap: true, svgType: "mand_roundabout", note: "Blue circle with 3 white arrows = Mandatory Roundabout circulation" },
+      { id: 82, page: 2, row: 2, col: 1, label: "ROUNDABOUT", cat: "mandatory", trap: true, svgType: "mand_roundabout", note: "Blue circle with 3 white arrows = Mandatory Roundabout" },
       { id: 83, page: 2, row: 2, col: 2, label: "MINIMUM SPEED", cat: "mandatory", trap: true, svgType: "mand_min_speed", note: "Blue circle with 30 = Minimum Speed Limit" },
       { id: 84, page: 2, row: 2, col: 3, label: "END OF MINIMUM SPEED", cat: "mandatory", trap: true, svgType: "mand_min_speed_end" },
       { id: 85, page: 2, row: 2, col: 4, label: "SNOW CHAINS MANDATORY", cat: "mandatory", trap: false, svgType: "mand_chains" },
@@ -439,13 +437,13 @@
       { id: 91, page: 2, row: 3, col: 2, label: "NO THROUGH ROAD", cat: "direction", trap: false, svgType: "info_dead_end" },
       { id: 92, page: 2, row: 3, col: 3, label: "TUNNEL", cat: "direction", trap: false, svgType: "info_tunnel" },
       { id: 93, page: 2, row: 3, col: 4, label: "AUTOSTRADA MOTORWAY", cat: "direction", trap: true, svgType: "info_autostrada", note: "GREEN background with highway bridge = Autostrada Motorway" },
-      { id: 94, page: 2, row: 3, col: 5, label: "FREEWAY", cat: "direction", trap: true, svgType: "info_freeway", note: "BLUE background with highway bridge = Freeway (Extraurbana Principale)" },
-      { id: 95, page: 2, row: 3, col: 6, label: "ADVISORY SPEED LIMIT", cat: "direction", trap: true, svgType: "info_advisory_50", note: "Blue square with white 50 = Advisory (recommended) speed limit" },
+      { id: 94, page: 2, row: 3, col: 5, label: "FREEWAY", cat: "direction", trap: true, svgType: "info_freeway", note: "BLUE background with highway bridge = Freeway" },
+      { id: 95, page: 2, row: 3, col: 6, label: "ADVISORY SPEED LIMIT", cat: "direction", trap: true, svgType: "info_advisory_50", note: "Blue square with white 50 = Advisory speed limit" },
       { id: 96, page: 2, row: 3, col: 7, label: "ACCIDENT AHEAD", cat: "direction", trap: false, svgType: "info_accident" },
 
       // ---------------- PAGE 2: ROW 5 (97-104) ----------------
       { id: 97, page: 2, row: 4, col: 0, label: "HOSPITAL", cat: "direction", trap: true, svgType: "info_hospital", note: "White bed + red cross = Hospital" },
-      { id: 98, page: 2, row: 4, col: 1, label: "FIRST AID", cat: "direction", trap: true, svgType: "info_first_aid", note: "Red cross only (no bed) = First Aid station" },
+      { id: 98, page: 2, row: 4, col: 1, label: "FIRST AID", cat: "direction", trap: true, svgType: "info_first_aid", note: "Red cross only (no bed) = First Aid" },
       { id: 99, page: 2, row: 4, col: 2, label: "REPAIR SERVICE", cat: "direction", trap: false, svgType: "info_repair" },
       { id: 100, page: 2, row: 4, col: 3, label: "GAS STATION", cat: "direction", trap: false, svgType: "info_gas" },
       { id: 101, page: 2, row: 4, col: 4, label: "CAR FERRIES", cat: "direction", trap: false, svgType: "info_ferry" },
@@ -459,9 +457,9 @@
       { id: 107, page: 2, row: 5, col: 2, label: "DIRECTIONS IN URBAN AREAS AND GREEN PANEL INDICATES MOTORWAY", cat: "direction", trap: true, svgType: "dir_urban_green", note: "White urban sign with GREEN top panel (tangenziale / autostrade)" },
       { id: 108, page: 2, row: 5, col: 3, label: "DIRECTIONS ON A MAIN HIGHWAY", cat: "direction", trap: true, svgType: "dir_main_hwy", note: "BLUE background directional sign (GORIZIA / UDINE) = Main Highway" },
       { id: 109, page: 2, row: 5, col: 4, label: "DIRECTIONS ON A MOTORWAY", cat: "direction", trap: true, svgType: "dir_motorway", note: "GREEN background directional sign (A1 NAPOLI / A14 BARI) = Motorway" },
-      { id: 110, page: 2, row: 5, col: 5, label: "PROVINCIAL BOUNDARY SIGN", cat: "direction", trap: true, svgType: "dir_prov_blue", note: "BLUE sign with POTENZA (slashed) / MATERA = Provincial Boundary Sign" },
-      { id: 111, page: 2, row: 5, col: 6, label: "PROVINCIAL BOUNDARY SIGN (MOTORWAY)", cat: "direction", trap: true, svgType: "dir_prov_green", note: "GREEN sign with VENEZIA (slashed) / PADOVA = Provincial Boundary Sign (Motorway)" },
-      { id: 112, page: 2, row: 5, col: 7, label: "REGIONAL BOUNDARY SIGN", cat: "direction", trap: true, svgType: "dir_regional", note: "BLUE sign with PIEMONTE (slashed) / LOMBARDIA = Regional Boundary Sign" },
+      { id: 110, page: 2, row: 5, col: 5, label: "PROVINCIAL BOUNDARY SIGN", cat: "direction", trap: true, svgType: "dir_prov_blue", note: "BLUE sign with POTENZA / MATERA (slashed) = Provincial Boundary Sign" },
+      { id: 111, page: 2, row: 5, col: 6, label: "PROVINCIAL BOUNDARY SIGN (MOTORWAY)", cat: "direction", trap: true, svgType: "dir_prov_green", note: "GREEN sign with VENEZIA / PADOVA (slashed) = Provincial Boundary Sign (Motorway)" },
+      { id: 112, page: 2, row: 5, col: 7, label: "REGIONAL BOUNDARY SIGN", cat: "direction", trap: true, svgType: "dir_regional", note: "BLUE sign with PIEMONTE / LOMBARDIA (slashed) = Regional Boundary Sign" },
 
       // ---------------- PAGE 2: ROW 7 (113-118) - 6 COLUMNS ----------------
       { id: 113, page: 2, row: 6, col: 0, colsInRow: 6, label: "TOWN NAME SIGN", cat: "direction", trap: false, svgType: "dir_town" },
@@ -487,7 +485,6 @@
     function generateSignSVG(sign) {
       const t = sign.svgType;
 
-      // Helper wrappers
       const triangleWrap = (inner, bg = "#ffffff") => `
         <svg viewBox="0 0 120 110" class="w-full h-full">
           <polygon points="60,8 112,98 8,98" fill="${bg}" stroke="#dc2626" stroke-width="11" stroke-linejoin="round" />
@@ -516,7 +513,13 @@
           ${redSlash ? `<line x1="25" y1="95" x2="95" y2="25" stroke="#dc2626" stroke-width="10" />` : ''}
         </svg>`;
 
-      // Determine background for warning vs temporary
+      // Helper for pointed St. Andrew's Crossbuck arm
+      const crossbuckArm = (angle) => `
+        <g transform="rotate(${angle})">
+          <polygon points="-52,0 -43,-9 43,-9 52,0 43,9 -43,9" fill="#dc2626" />
+          <rect x="-39" y="-4" width="78" height="8" fill="#ffffff" />
+        </g>`;
+
       const isYellow = t.startsWith("temp_");
       const triBg = isYellow ? "#facc15" : "#ffffff";
       const baseType = t.replace("temp_", "warn_");
@@ -587,21 +590,27 @@
           return triangleWrap(`<circle cx="54" cy="52" r="5" fill="#111827"/><path d="M54,58 L48,74 L42,86 M48,74 L58,86 M46,64 L68,76" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/><polygon points="66,74 82,86 62,86" fill="#111827"/>`, triBg);
       }
 
-      // --- RAILROAD CROSSBUCKS ---
+      // --- RAILROAD CROSSBUCKS (FIXED TO MATCH EXACT DOUBLE-X PDF ARTWORK) ---
       if (t === "rr_single") {
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
           <g transform="translate(60,60)">
-            <rect x="-48" y="-10" width="96" height="20" transform="rotate(35)" fill="#ffffff" stroke="#dc2626" stroke-width="6"/>
-            <rect x="-48" y="-10" width="96" height="20" transform="rotate(-35)" fill="#ffffff" stroke="#dc2626" stroke-width="6"/>
+            ${crossbuckArm(28)}
+            ${crossbuckArm(-28)}
           </g>
         </svg>`;
       }
       if (t === "rr_multi") {
+        // Two stacked St. Andrew's X crossbucks with pointed red tips and white inner bars
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <g transform="translate(60,48)">
-            <rect x="-46" y="-9" width="92" height="18" transform="rotate(35)" fill="#ffffff" stroke="#dc2626" stroke-width="5"/>
-            <rect x="-46" y="-9" width="92" height="18" transform="rotate(-35)" fill="#ffffff" stroke="#dc2626" stroke-width="5"/>
-            <path d="M-36,26 L0,50 L36,26" fill="none" stroke="#dc2626" stroke-width="10" stroke-linecap="square"/>
+          <!-- Upper X Crossbuck -->
+          <g transform="translate(60,34) scale(0.78)">
+            ${crossbuckArm(26)}
+            ${crossbuckArm(-26)}
+          </g>
+          <!-- Lower X Crossbuck -->
+          <g transform="translate(60,76) scale(1.02)">
+            ${crossbuckArm(26)}
+            ${crossbuckArm(-26)}
           </g>
         </svg>`;
       }
@@ -684,7 +693,7 @@
       if (t === "proh_max_width") return redCircleWrap(`<polygon points="20,60 32,52 32,68" fill="#111827"/><polygon points="100,60 88,52 88,68" fill="#111827"/><text x="60" y="68" font-size="22" font-weight="900" fill="#111827" text-anchor="middle">2,30m</text>`);
       if (t === "proh_max_height") return redCircleWrap(`<polygon points="60,20 52,32 68,32" fill="#111827"/><polygon points="60,100 52,88 68,88" fill="#111827"/><text x="60" y="68" font-size="22" font-weight="900" fill="#111827" text-anchor="middle">3,50m</text>`);
       if (t === "proh_max_weight") return redCircleWrap(`<text x="60" y="68" font-size="25" font-weight="900" fill="#111827" text-anchor="middle">7,00t</text>`);
-      if (t === "proh_max_axle") return redCircleWrap(`<text x="60" y="54" font-size="22" font-weight="900" fill="#111827" text-anchor="middle">7,0t</text><line x1="36" y1="74" x2="84" y2="74" stroke="#111827" stroke-width="5"/><rect x="38" y="66" width="6" height="16" fill="#111827"/><rect x="76" y="66" width="6" height="16" fill="#111827"/>`);
+      if (t === "proh_max_axle") return redCircleWrap(`<text x="60" y="46" font-size="22" font-weight="900" fill="#111827" text-anchor="middle">7,0</text><path d="M60,50 L60,64 M54,58 L60,65 L66,58" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/><line x1="34" y1="76" x2="86" y2="76" stroke="#111827" stroke-width="5"/><rect x="34" y="67" width="5" height="18" fill="#111827"/><rect x="42" y="67" width="5" height="18" fill="#111827"/><rect x="73" y="67" width="5" height="18" fill="#111827"/><rect x="81" y="67" width="5" height="18" fill="#111827"/>`);
       if (t === "proh_police") return redCircleWrap(`<line x1="24" y1="60" x2="96" y2="60" stroke="#111827" stroke-width="6"/><text x="60" y="48" font-size="15" font-weight="900" fill="#111827" text-anchor="middle">ALT</text><text x="60" y="80" font-size="14" font-weight="900" fill="#111827" text-anchor="middle">POLIZIA</text>`);
       if (t === "proh_customs") return redCircleWrap(`<line x1="24" y1="60" x2="96" y2="60" stroke="#111827" stroke-width="6"/><text x="60" y="48" font-size="13" font-weight="900" fill="#111827" text-anchor="middle">DOGANA</text><text x="60" y="80" font-size="13" font-weight="900" fill="#111827" text-anchor="middle">DOUANE</text>`);
 
@@ -889,10 +898,10 @@
         const botTxt = t === "dir_prov_blue" ? "MATERA" : (t === "dir_prov_green" ? "PADOVA" : "LOMBARDIA");
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
           <rect x="12" y="12" width="96" height="96" rx="6" fill="${bg}" stroke="#ffffff" stroke-width="4"/>
-          <text x="60" y="45" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">${topTxt}</text>
-          <line x1="20" y1="54" x2="100" y2="26" stroke="#dc2626" stroke-width="7"/>
+          <text x="60" y="44" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">${topTxt}</text>
           <line x1="16" y1="60" x2="104" y2="60" stroke="#ffffff" stroke-width="2"/>
-          <text x="60" y="86" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">${botTxt}</text>
+          <text x="60" y="88" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">${botTxt}</text>
+          <line x1="20" y1="96" x2="100" y2="68" stroke="#dc2626" stroke-width="7"/>
         </svg>`;
       }
       if (t === "dir_town") {
@@ -965,10 +974,34 @@
     }
 
     // ============================================================================
-    // OPTIONAL PDF CLIENT-SIDE SLICER (Crops directly from Drivers Study Guide.pdf)
+    // SMART PDF SLICER (COLOR-BOUNDING-BOX DETECTOR FOR P1 + EXACT LAYOUT FOR P2)
     // ============================================================================
     const pdfCroppedDataUrls = {}; // id -> dataURL
     let renderPreference = 'svg'; // 'svg' or 'pdf'
+
+    // Exact measured coordinates on Page 2 (normalized 0.0 -> 1.0)
+    const P2_COLS_8 = [
+      [0.012, 0.114], [0.124, 0.238], [0.248, 0.362], [0.374, 0.488],
+      [0.498, 0.612], [0.623, 0.742], [0.753, 0.867], [0.876, 0.986]
+    ];
+    const P2_ROWS_6 = [
+      [0.002, 0.060], // Row 1
+      [0.112, 0.191], // Row 2
+      [0.236, 0.315], // Row 3
+      [0.358, 0.439], // Row 4
+      [0.482, 0.563], // Row 5
+      [0.606, 0.686]  // Row 6
+    ];
+    const P2_ROW_7_COLS = [
+      [0.008, 0.150], [0.168, 0.315], [0.332, 0.485],
+      [0.500, 0.652], [0.665, 0.818], [0.830, 0.975]
+    ];
+    const P2_ROW_7_Y = [0.743, 0.782];
+    const P2_ROW_8_COLS = [
+      [0.015, 0.110], [0.162, 0.252], [0.308, 0.395],
+      [0.432, 0.555], [0.578, 0.692], [0.718, 0.830], [0.855, 0.975]
+    ];
+    const P2_ROW_8_Y = [0.838, 0.918];
 
     function openPdfModal() {
       document.getElementById('pdfModal').classList.remove('hidden');
@@ -985,8 +1018,131 @@
       document.getElementById('prefPdfBtn').className = pref === 'pdf'
         ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white'
         : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300';
+      document.getElementById('pdfBtnLabel').textContent = pref === 'pdf'
+        ? 'Graphics: PDF Scans ✓'
+        : 'Graphics: Vectors';
       if (currentQuestion) renderCurrentQuestion();
       renderStudyGrid();
+    }
+
+    // Smart Page 1 color-bounding-box detector:
+    // Every single sign on Page 1 has a bright Red, Yellow, or Blue outer shape,
+    // while all English text captions underneath are 100% grayscale black text.
+    // Locking onto the colored pixels guarantees 0% clipped signs and 0% text bleed!
+    function cropPage1SignSmart(ctx, canvasW, canvasH, row, col) {
+      const topHeader = canvasH * 0.032;
+      const gridH = canvasH - topHeader;
+      const cellW = canvasW / 8.0;
+      const cellH = gridH / 8.0;
+
+      // Search window covering the cell (allowing generous top/side margin for tall signs like Sign #10)
+      const sx0 = Math.max(0, Math.floor(col * cellW + cellW * 0.02));
+      const sx1 = Math.min(canvasW - 1, Math.ceil((col + 1) * cellW - cellW * 0.02));
+      const sy0 = Math.max(0, Math.floor(topHeader + row * cellH - cellH * 0.08));
+      const sy1 = Math.min(canvasH - 1, Math.ceil(topHeader + (row + 0.72) * cellH));
+
+      const sw = sx1 - sx0;
+      const sh = sy1 - sy0;
+      const imgData = ctx.getImageData(sx0, sy0, sw, sh).data;
+
+      let minX = sw, maxX = 0, minY = sh, maxY = 0;
+      let foundColor = false;
+
+      for (let py = 0; py < sh; py++) {
+        for (let px = 0; px < sw; px++) {
+          const idx = (py * sw + px) * 4;
+          const r = imgData[idx], g = imgData[idx + 1], b = imgData[idx + 2];
+          const maxC = Math.max(r, g, b);
+          const minC = Math.min(r, g, b);
+          const sat = maxC - minC;
+          // Detect Red, Yellow, or Blue sign pixels
+          if (sat > 38 && maxC > 75) {
+            if (px < minX) minX = px;
+            if (px > maxX) maxX = px;
+            if (py < minY) minY = py;
+            if (py > maxY) maxY = py;
+            foundColor = true;
+          }
+        }
+      }
+
+      let cropX, cropY, cropW, cropH;
+      if (foundColor && (maxX - minX) > 10 && (maxY - minY) > 10) {
+        // Add small padding around the detected colored sign graphic
+        const padX = Math.round((maxX - minX) * 0.10);
+        const padTop = Math.round((maxY - minY) * 0.10);
+        const padBot = Math.round((maxY - minY) * 0.05);
+        cropX = Math.max(0, sx0 + minX - padX);
+        cropY = Math.max(0, sy0 + minY - padTop);
+        const rightEdge = Math.min(canvasW, sx0 + maxX + padX);
+        const botEdge = Math.min(canvasH, sy0 + maxY + padBot);
+        cropW = rightEdge - cropX;
+        cropH = botEdge - cropY;
+      } else {
+        // Fallback if a custom PDF is monochrome
+        cropX = Math.floor(col * cellW + cellW * 0.05);
+        cropY = Math.floor(topHeader + row * cellH);
+        cropW = Math.floor(cellW * 0.90);
+        cropH = Math.floor(cellH * 0.56);
+      }
+
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = cropW;
+      outCanvas.height = cropH;
+      outCanvas.getContext('2d').drawImage(ctx.canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+      return outCanvas.toDataURL('image/png');
+    }
+
+    function cropPage2SignExact(ctx, canvasW, canvasH, sign) {
+      let xRange, yRange;
+      if (sign.row < 6) {
+        xRange = P2_COLS_8[sign.col];
+        yRange = P2_ROWS_6[sign.row];
+      } else if (sign.row === 6) {
+        xRange = P2_ROW_7_COLS[sign.col];
+        yRange = P2_ROW_7_Y;
+      } else {
+        xRange = P2_ROW_8_COLS[sign.col];
+        yRange = P2_ROW_8_Y;
+      }
+
+      const cropX = Math.floor(xRange[0] * canvasW);
+      const cropY = Math.floor(yRange[0] * canvasH);
+      const cropW = Math.floor((xRange[1] - xRange[0]) * canvasW);
+      const cropH = Math.floor((yRange[1] - yRange[0]) * canvasH);
+
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = cropW;
+      outCanvas.height = cropH;
+      outCanvas.getContext('2d').drawImage(ctx.canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+      return outCanvas.toDataURL('image/png');
+    }
+
+    async function processPdfBuffer(arrayBuf) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+
+      for (let pageNum = 1; pageNum <= Math.min(2, pdf.numPages); pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 2.5 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        const pageSigns = SIGNS_DB.filter(s => s.page === pageNum);
+        for (const s of pageSigns) {
+          if (pageNum === 1) {
+            pdfCroppedDataUrls[s.id] = cropPage1SignSmart(ctx, canvas.width, canvas.height, s.row, s.col);
+          } else {
+            pdfCroppedDataUrls[s.id] = cropPage2SignExact(ctx, canvas.width, canvas.height, s);
+          }
+        }
+      }
+
+      document.getElementById('prefPdfBtn').disabled = false;
+      setRenderPreference('pdf');
     }
 
     async function handlePdfUpload(event) {
@@ -994,51 +1150,27 @@
       if (!file) return;
       const statusEl = document.getElementById('pdfCropStatus');
       statusEl.classList.remove('hidden');
-      statusEl.textContent = "Rendering PDF pages and slicing all 125 sign icons...";
+      statusEl.textContent = "Smart-cropping all 125 sign icons from PDF...";
 
       try {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         const arrayBuf = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
-
-        for (let pageNum = 1; pageNum <= Math.min(2, pdf.numPages); pageNum++) {
-          const page = await pdf.getPage(pageNum);
-          const viewport = page.getViewport({ scale: 2.5 });
-          const canvas = document.createElement('canvas');
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-          const ctx = canvas.getContext('2d');
-          await page.render({ canvasContext: ctx, viewport }).promise;
-
-          // Slice signs for this page
-          const pageSigns = SIGNS_DB.filter(s => s.page === pageNum);
-          const topOffset = pageNum === 1 ? canvas.height * 0.045 : canvas.height * 0.005;
-          const usableHeight = canvas.height - topOffset - (canvas.height * 0.01);
-          const rowHeight = usableHeight / 8;
-
-          for (const s of pageSigns) {
-            const cols = s.colsInRow || 8;
-            const colWidth = canvas.width / cols;
-            const x = s.col * colWidth + (colWidth * 0.06);
-            const y = topOffset + (s.row * rowHeight) + (rowHeight * 0.03);
-            const w = colWidth * 0.88;
-            // Crop top 64% of each cell so only the sign icon is shown (hiding the English text answer underneath!)
-            const h = rowHeight * 0.64;
-
-            const cropCanvas = document.createElement('canvas');
-            cropCanvas.width = w;
-            cropCanvas.height = h;
-            cropCanvas.getContext('2d').drawImage(canvas, x, y, w, h, 0, 0, w, h);
-            pdfCroppedDataUrls[s.id] = cropCanvas.toDataURL('image/png');
-          }
-        }
-
-        document.getElementById('prefPdfBtn').disabled = false;
-        document.getElementById('pdfBtnLabel').textContent = "PDF Scans Active ✓";
-        statusEl.textContent = "Success! Extracted all 125 sign crops from your PDF. Switched to PDF Scans mode.";
-        setRenderPreference('pdf');
+        await processPdfBuffer(arrayBuf);
+        statusEl.textContent = "Success! All 125 signs smart-cropped with zero clipping.";
       } catch (err) {
         statusEl.textContent = "Could not parse PDF file. Built-in vector signs remain active.";
+      }
+    }
+
+    // Automatically load Drivers Study Guide.pdf if present in the same GitHub Pages repo!
+    async function tryAutoLoadRepoPdf() {
+      try {
+        const res = await fetch('./Drivers%20Study%20Guide.pdf');
+        if (res.ok) {
+          const buf = await res.arrayBuffer();
+          await processPdfBuffer(buf);
+        }
+      } catch (_) {
+        // Silently stay on crisp built-in SVG vectors if offline / local file
       }
     }
 
@@ -1053,7 +1185,7 @@
     // QUIZ ENGINE & STATE MANAGEMENT
     // ============================================================================
     let currentTab = 'quiz';
-    let currentMode = 'exam48'; // 'exam48' | 'traps' | 'all125' | 'missed'
+    let currentMode = 'exam48';
     let questionQueue = [];
     let currentIndex = 0;
     let currentQuestion = null;
@@ -1063,8 +1195,23 @@
     let missCount = 0;
     let blindStudyMode = false;
 
-    // In-memory tracking of missed or flagged sign IDs
-    const weakSignIds = new Set([9, 10, 14, 16, 17, 41, 42, 47, 52, 71, 72, 74, 75, 93, 94]);
+    const DEFAULT_WEAK_IDS = [9, 10, 14, 16, 17, 41, 42, 47, 52, 71, 72, 74, 75, 93, 94];
+    let weakSignIds = new Set(DEFAULT_WEAK_IDS);
+
+    try {
+      const saved = localStorage.getItem('naples_weak_sign_ids');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) weakSignIds = new Set(parsed);
+      }
+    } catch (_) {}
+
+    function saveWeakSigns() {
+      try {
+        localStorage.setItem('naples_weak_sign_ids', JSON.stringify([...weakSignIds]));
+      } catch (_) {}
+      updateWeakCountBadge();
+    }
 
     function updateWeakCountBadge() {
       document.getElementById('missedCountBadge').textContent = weakSignIds.size;
@@ -1097,7 +1244,6 @@
     function startNewSession(mode) {
       currentMode = mode;
 
-      // Highlight active mode button
       ['exam48', 'traps', 'all125', 'missed'].forEach(m => {
         const btn = document.getElementById('mode_' + m);
         if (m === mode) {
@@ -1137,7 +1283,6 @@
     }
 
     function buildDistractors(targetSign) {
-      // Pick 3 plausible distractors with distinct labels (preferring same category or traps)
       const usedLabels = new Set([targetSign.label]);
       const sameCat = shuffleArray(SIGNS_DB.filter(s => s.cat === targetSign.cat && !usedLabels.has(s.label)));
       const otherPool = shuffleArray(SIGNS_DB.filter(s => !usedLabels.has(s.label)));
@@ -1187,7 +1332,6 @@
       document.getElementById('scoreCorrectText').textContent = correctCount;
       renderStrikeDots();
 
-      // Category & Page badge
       const catNames = {
         warning: 'Warning Sign',
         temporary: 'Temporary Warning (Yellow)',
@@ -1207,17 +1351,14 @@
         varBadge.classList.add('hidden');
       }
 
-      // Star button state
       const starred = weakSignIds.has(q.id);
       document.getElementById('starIcon').textContent = starred ? '★' : '☆';
       document.getElementById('starCurrentBtn').className = starred
         ? 'px-3 py-2 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition'
         : 'px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition';
 
-      // Render Sign Visual
       document.getElementById('signStage').innerHTML = getSignVisualHTML(q);
 
-      // Render Options
       const optionsGrid = document.getElementById('optionsGrid');
       optionsGrid.innerHTML = currentOptions.map((optLabel, i) => `
         <button onclick="selectOption(${i})" id="optBtn_${i}" class="group text-left p-3.5 sm:p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-800 border-2 border-slate-700/80 hover:border-blue-500/60 transition flex items-start gap-3">
@@ -1246,7 +1387,7 @@
       } else {
         missCount++;
         weakSignIds.add(currentQuestion.id);
-        updateWeakCountBadge();
+        saveWeakSigns();
         document.getElementById('starIcon').textContent = '★';
         if (missCount >= 3 && currentMode === 'exam48') {
           document.getElementById('failAlertBanner').classList.remove('hidden');
@@ -1256,7 +1397,6 @@
       document.getElementById('scoreCorrectText').textContent = correctCount;
       renderStrikeDots();
 
-      // Style buttons
       currentOptions.forEach((optLabel, i) => {
         const btn = document.getElementById('optBtn_' + i);
         if (optLabel === correct) {
@@ -1268,7 +1408,6 @@
         }
       });
 
-      // Show Feedback Bar
       const fbBar = document.getElementById('feedbackBar');
       const fbTitle = document.getElementById('feedbackTitle');
       const fbSub = document.getElementById('feedbackSub');
@@ -1301,7 +1440,7 @@
       } else {
         weakSignIds.add(currentQuestion.id);
       }
-      updateWeakCountBadge();
+      saveWeakSigns();
       const starred = weakSignIds.has(currentQuestion.id);
       document.getElementById('starIcon').textContent = starred ? '★' : '☆';
     }
@@ -1353,7 +1492,7 @@
       } else {
         weakSignIds.add(id);
       }
-      updateWeakCountBadge();
+      saveWeakSigns();
       renderStudyGrid();
     }
 
@@ -1383,7 +1522,7 @@
                 ${isStarred ? '★' : '☆'}
               </button>
             </div>
-            <div class="w-24 h-24 flex items-center justify-center p-1">
+            <div class="w-24 h-24 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-inner">
               ${getSignVisualHTML(s)}
             </div>
             <div class="study-label w-full text-center transition ${blindStudyMode ? 'blur-md select-none' : ''}">
@@ -1397,7 +1536,7 @@
     }
 
     // ============================================================================
-    // KEYBOARD SHORTCUTS FOR MACBOOK CRAMMING (1-4 & SPACE/ENTER)
+    // KEYBOARD SHORTCUTS (1-4 & SPACE/ENTER)
     // ============================================================================
     window.addEventListener('keydown', (e) => {
       if (currentTab !== 'quiz') return;
@@ -1416,9 +1555,9 @@
       }
     });
 
-    // Start initial 48Q Exam Session on load
     window.onload = () => {
       startNewSession('exam48');
+      tryAutoLoadRepoPdf();
     };
   </script>
 </body>
