@@ -5,6 +5,11 @@ extract_signs.py
 Slices all 125 road sign icons from 'Drivers Study Guide.pdf' into individual
 PNG files inside ./assets/signs/ and writes ./assets/signs_manifest.json.
 
+Uses smart color-saturation bounding-box detection on Page 1 (so tall signs like
+Unguarded Railroad Crossing Multiple Track are never clipped at the top and never
+include the 4-line text label at the bottom) and exact measured cell coordinates
+on Page 2 (handling the shorter Row 7 and 7-column Row 8 accurately).
+
 Usage:
     pip install pymupdf pillow
     python3 extract_signs.py "Drivers Study Guide.pdf"
@@ -24,7 +29,6 @@ except ImportError:
     sys.exit(1)
 
 
-# Official 125-sign layout matching Page 1 (8x8 = 64) and Page 2 (61 signs)
 PAGE_1_LABELS = [
     # Row 1
     "BUMPY ROAD", "HUMPS", "CURVE TO THE RIGHT", "CURVE TO THE LEFT",
@@ -46,7 +50,7 @@ PAGE_1_LABELS = [
     "RISK OF FIRE", "WILD ANIMALS", "DANGER",
     # Row 5 (Temporary Yellow Warning Triangles)
     "WORK IN PROGRESS", "ROAD NARROWS (TEMPORARY)",
-    "ROAD NARROWS ON LEFT (TEMPORARY)", "ROAD NARROWS ON RIGHT (TEMPORARY)",
+    "ROAD NARROWS ON RIGHT (TEMPORARY)", "ROAD NARROWS ON LEFT (TEMPORARY)",
     "TWO-WAY TRAFFIC (TEMPORARY)",
     "DANGEROUS UNSTEADY MATERIALS ON THE ROAD (TEMPORARY)",
     "TRAFFIC LIGHTS (TEMPORARY)", "DANGER (TEMPORARY)",
@@ -70,7 +74,6 @@ PAGE_1_LABELS = [
 ]
 
 PAGE_2_ROWS = [
-    # Rows 1-6 (8 columns each = 48 signs)
     [
         "MAXIMUM WIDTH IN METERS", "MAXIMUM HEIGHT IN METERS",
         "MAXIMUM WEIGHT IN METRIC TONS",
@@ -104,13 +107,11 @@ PAGE_2_ROWS = [
         "PROVINCIAL BOUNDARY SIGN", "PROVINCIAL BOUNDARY SIGN (MOTORWAY)",
         "REGIONAL BOUNDARY SIGN"
     ],
-    # Row 7 (6 columns)
     [
         "TOWN NAME SIGN", "MOTORWAY DIRECTION",
         "PRIMARY OR SECONDARY ROAD DIRECTION", "URBAN AREA DIRECTION",
         "DETOUR", "DIRECTION TO TOURIST ATTRACTION"
     ],
-    # Row 8 (7 columns)
     [
         "MERGING LANES (REDUCTION)", "MERGING LANES (DEVIATION)",
         "MERGING CARRIAGEWAY", "ALL TRIANGLES INDICATE A WARNING",
@@ -120,12 +121,81 @@ PAGE_2_ROWS = [
     ]
 ]
 
+P2_COLS_8 = [
+    (0.012, 0.114), (0.124, 0.238), (0.248, 0.362), (0.374, 0.488),
+    (0.498, 0.612), (0.623, 0.742), (0.753, 0.867), (0.876, 0.986)
+]
+P2_ROWS_6 = [
+    (0.002, 0.060), (0.112, 0.191), (0.236, 0.315),
+    (0.358, 0.439), (0.482, 0.563), (0.606, 0.686)
+]
+P2_ROW_7_COLS = [
+    (0.008, 0.150), (0.168, 0.315), (0.332, 0.485),
+    (0.500, 0.652), (0.665, 0.818), (0.830, 0.975)
+]
+P2_ROW_7_Y = (0.743, 0.782)
+P2_ROW_8_COLS = [
+    (0.015, 0.110), (0.162, 0.252), (0.308, 0.395),
+    (0.432, 0.555), (0.578, 0.692), (0.718, 0.830), (0.855, 0.975)
+]
+P2_ROW_8_Y = (0.838, 0.918)
+
 
 def slugify(text: str) -> str:
     cleaned = "".join(c if c.isalnum() else "_" for c in text.lower())
     while "__" in cleaned:
         cleaned = cleaned.replace("__", "_")
     return cleaned.strip("_")
+
+
+def smart_crop_page1_cell(img: Image.Image, row: int, col: int) -> Image.Image:
+    w, h = img.size
+    top_header = h * 0.032
+    grid_h = h - top_header
+    cell_w = w / 8.0
+    cell_h = grid_h / 8.0
+
+    sx0 = max(0, int(col * cell_w + cell_w * 0.02))
+    sx1 = min(w, int((col + 1) * cell_w - cell_w * 0.02))
+    sy0 = max(0, int(top_header + row * cell_h - cell_h * 0.08))
+    sy1 = min(h, int(top_header + (row + 0.72) * cell_h))
+
+    sub = img.crop((sx0, sy0, sx1, sy1))
+    sw, sh = sub.size
+    pixels = sub.load()
+
+    min_x, max_x = sw, 0
+    min_y, max_y = sh, 0
+    found = False
+
+    for py in range(sh):
+        for px in range(sw):
+            r, g, b = pixels[px, py][:3]
+            max_c = max(r, g, b)
+            min_c = min(r, g, b)
+            if (max_c - min_c) > 38 and max_c > 75:
+                if px < min_x: min_x = px
+                if px > max_x: max_x = px
+                if py < min_y: min_y = py
+                if py > max_y: max_y = py
+                found = True
+
+    if found and (max_x - min_x) > 10 and (max_y - min_y) > 10:
+        pad_x = int((max_x - min_x) * 0.10)
+        pad_top = int((max_y - min_y) * 0.10)
+        pad_bot = int((max_y - min_y) * 0.05)
+        cx0 = max(0, sx0 + min_x - pad_x)
+        cy0 = max(0, sy0 + min_y - pad_top)
+        cx1 = min(w, sx0 + max_x + pad_x)
+        cy1 = min(h, sy0 + max_y + pad_bot)
+        return img.crop((cx0, cy0, cx1, cy1))
+
+    return img.crop((
+        int(col * cell_w + cell_w * 0.05),
+        int(top_header + row * cell_h),
+        int((col + 1) * cell_w - cell_w * 0.05),
+        int(top_header + row * cell_h + cell_h * 0.56)
+    ))
 
 
 def extract_all_signs(pdf_path: str, output_dir: str = "assets/signs"):
@@ -145,23 +215,10 @@ def extract_all_signs(pdf_path: str, output_dir: str = "assets/signs"):
     pix1 = page1.get_pixmap(dpi=300)
     img1 = Image.frombytes("RGB", [pix1.width, pix1.height], pix1.samples)
 
-    w1, h1 = img1.size
-    top_margin_p1 = int(h1 * 0.045)  # Skip "ITALIAN DRIVER'S LICENSE STUDY GUIDE" title
-    bottom_margin_p1 = int(h1 * 0.01)
-    usable_h1 = h1 - top_margin_p1 - bottom_margin_p1
-    row_h1 = usable_h1 / 8.0
-    col_w1 = w1 / 8.0
-
     for row in range(8):
         for col in range(8):
             label = PAGE_1_LABELS[row * 8 + col]
-            x0 = int(col * col_w1 + col_w1 * 0.05)
-            x1 = int((col + 1) * col_w1 - col_w1 * 0.05)
-            y0 = int(top_margin_p1 + row * row_h1 + row_h1 * 0.02)
-            # Crop top 64% of cell to isolate the sign graphic without the English caption below
-            y1 = int(top_margin_p1 + row * row_h1 + row_h1 * 0.64)
-
-            crop = img1.crop((x0, y0, x1, y1))
+            crop = smart_crop_page1_cell(img1, row, col)
             filename = f"sign_{sign_id:03d}_{slugify(label)}.png"
             file_rel_path = out_path / filename
             crop.save(file_rel_path)
@@ -181,22 +238,24 @@ def extract_all_signs(pdf_path: str, output_dir: str = "assets/signs"):
         page2 = doc[1]
         pix2 = page2.get_pixmap(dpi=300)
         img2 = Image.frombytes("RGB", [pix2.width, pix2.height], pix2.samples)
-
         w2, h2 = img2.size
-        top_margin_p2 = int(h2 * 0.005)
-        usable_h2 = h2 - top_margin_p2 - int(h2 * 0.01)
-        row_h2 = usable_h2 / 8.0
 
         for row_idx, row_labels in enumerate(PAGE_2_ROWS):
-            num_cols = len(row_labels)
-            col_w2 = w2 / float(num_cols)
             for col_idx, label in enumerate(row_labels):
-                x0 = int(col_idx * col_w2 + col_w2 * 0.05)
-                x1 = int((col_idx + 1) * col_w2 - col_w2 * 0.05)
-                y0 = int(top_margin_p2 + row_idx * row_h2 + row_h2 * 0.02)
-                y1 = int(top_margin_p2 + row_idx * row_h2 + row_h2 * 0.64)
+                if row_idx < 6:
+                    xr = P2_COLS_8[col_idx]
+                    yr = P2_ROWS_6[row_idx]
+                elif row_idx == 6:
+                    xr = P2_ROW_7_COLS[col_idx]
+                    yr = P2_ROW_7_Y
+                else:
+                    xr = P2_ROW_8_COLS[col_idx]
+                    yr = P2_ROW_8_Y
 
+                x0, x1 = int(xr[0] * w2), int(xr[1] * w2)
+                y0, y1 = int(yr[0] * h2), int(yr[1] * h2)
                 crop = img2.crop((x0, y0, x1, y1))
+
                 filename = f"sign_{sign_id:03d}_{slugify(label)}.png"
                 file_rel_path = out_path / filename
                 crop.save(file_rel_path)
