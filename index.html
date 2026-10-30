@@ -163,7 +163,7 @@
         <!-- Sign Visual Stage -->
         <div class="flex flex-col items-center justify-center my-auto py-2">
           <div id="signStage" class="w-48 h-48 sm:w-56 sm:h-56 bg-white border-2 border-slate-700/80 rounded-3xl flex items-center justify-center p-3 sign-shadow relative overflow-hidden">
-            <!-- Rendered SVG or Cropped PDF Canvas goes here -->
+            <!-- Rendered SVG goes here -->
           </div>
           <p class="text-xs text-slate-400 mt-3 font-medium text-center">
             Select the exact official study guide meaning for this sign:
@@ -427,9 +427,9 @@
       { id: 118, page: 2, row: 6, col: 5, colsInRow: 6, label: "DIRECTION TO TOURIST ATTRACTION", cat: "direction", trap: false, svgType: "dir_tourist", note: "BROWN arrow sign (Colfosco 182) = Direction to Tourist Attraction" },
 
       // ---------------- PAGE 2: ROW 8 (119-125) - 7 COLUMNS ----------------
-      { id: 119, page: 2, row: 7, col: 0, colsInRow: 7, label: "MERGING LANES", cat: "direction", trap: true, variant: "Left Lane Ends / 2-to-1 Arrow", svgType: "lane_merge_1" },
+      { id: 119, page: 2, row: 7, col: 0, colsInRow: 7, label: "MERGING LANES", cat: "direction", trap: true, variant: "Right Lane Ends (2-to-1 Merge)", svgType: "lane_merge_1" },
       { id: 120, page: 2, row: 7, col: 1, colsInRow: 7, label: "MERGING LANES", cat: "direction", trap: true, variant: "Two Lanes Shift Right", svgType: "lane_merge_2" },
-      { id: 121, page: 2, row: 7, col: 2, colsInRow: 7, label: "MERGING CARRIAGEWAY", cat: "direction", trap: true, svgType: "lane_carriageway", note: "Left lane crosses median divider into right carriageway = Merging Carriageway" },
+      { id: 121, page: 2, row: 7, col: 2, colsInRow: 7, label: "MERGING CARRIAGEWAY", cat: "direction", trap: true, svgType: "lane_carriageway", note: "Two solid black center median humps (top & bottom) with a black arrow crossing left between two parallel red lines = Merging Carriageway" },
       { id: 122, page: 2, row: 7, col: 3, colsInRow: 7, label: "ALL TRIANGLES INDICATE A WARNING", cat: "rules", trap: true, svgType: "rule_triangle" },
       { id: 123, page: 2, row: 7, col: 4, colsInRow: 7, label: "ALL CIRCLES INDICATE SOMETHING PROHIBITED", cat: "rules", trap: true, svgType: "rule_circle_red" },
       { id: 124, page: 2, row: 7, col: 5, colsInRow: 7, label: "ALL BLUE CIRCLES INDICATE SOMETHING MANDATORY", cat: "rules", trap: true, svgType: "rule_circle_blue" },
@@ -481,6 +481,23 @@
       const triBg = isYellow ? "#facc15" : "#ffffff";
       const baseType = t.replace("temp_", "warn_");
 
+      // Helper for 3 circular roundabout arrows (counter-clockwise)
+      const roundaboutArrows = (cx, cy, r, color, strokeW, headSize) => `
+        <g transform="translate(${cx},${cy})">
+          <g transform="rotate(0)">
+            <path d="M ${r * Math.cos(-0.85)} ${r * Math.sin(-0.85)} A ${r} ${r} 0 0 0 ${r * Math.cos(-2.45)} ${r * Math.sin(-2.45)}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-linecap="butt"/>
+            <polygon points="${r * Math.cos(-2.85)},${r * Math.sin(-2.85)} ${(r + headSize) * Math.cos(-2.35)},${(r + headSize) * Math.sin(-2.35)} ${(r - headSize) * Math.cos(-2.35)},${(r - headSize) * Math.sin(-2.35)}" fill="${color}"/>
+          </g>
+          <g transform="rotate(120)">
+            <path d="M ${r * Math.cos(-0.85)} ${r * Math.sin(-0.85)} A ${r} ${r} 0 0 0 ${r * Math.cos(-2.45)} ${r * Math.sin(-2.45)}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-linecap="butt"/>
+            <polygon points="${r * Math.cos(-2.85)},${r * Math.sin(-2.85)} ${(r + headSize) * Math.cos(-2.35)},${(r + headSize) * Math.sin(-2.35)} ${(r - headSize) * Math.cos(-2.35)},${(r - headSize) * Math.sin(-2.35)}" fill="${color}"/>
+          </g>
+          <g transform="rotate(240)">
+            <path d="M ${r * Math.cos(-0.85)} ${r * Math.sin(-0.85)} A ${r} ${r} 0 0 0 ${r * Math.cos(-2.45)} ${r * Math.sin(-2.45)}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-linecap="butt"/>
+            <polygon points="${r * Math.cos(-2.85)},${r * Math.sin(-2.85)} ${(r + headSize) * Math.cos(-2.35)},${(r + headSize) * Math.sin(-2.35)} ${(r - headSize) * Math.cos(-2.35)},${(r - headSize) * Math.sin(-2.35)}" fill="${color}"/>
+          </g>
+        </g>`;
+
       // --- WARNING & TEMPORARY TRIANGLES ---
       switch (baseType) {
         case "warn_bumpy":
@@ -488,13 +505,25 @@
         case "warn_hump":
           return triangleWrap(`<path d="M28,86 L28,80 L40,80 Q60,56 80,80 L92,80 L92,86 Z" fill="#111827"/>`, triBg);
         case "warn_curve_r":
-          return triangleWrap(`<path d="M46,88 L46,72 Q46,50 78,46" fill="none" stroke="#111827" stroke-width="10" stroke-linecap="butt"/>`, triBg);
+          // True 90-degree curve to the right
+          return triangleWrap(`
+            <path d="M46,86 L46,72 A22,22 0 0,1 68,50 L78,50" fill="none" stroke="#111827" stroke-width="9.5" stroke-linecap="butt"/>
+          `, triBg);
         case "warn_curve_l":
-          return triangleWrap(`<path d="M74,88 L74,72 Q74,50 42,46" fill="none" stroke="#111827" stroke-width="10" stroke-linecap="butt"/>`, triBg);
+          // True 90-degree curve to the left
+          return triangleWrap(`
+            <path d="M74,86 L74,72 A22,22 0 0,0 52,50 L42,50" fill="none" stroke="#111827" stroke-width="9.5" stroke-linecap="butt"/>
+          `, triBg);
         case "warn_dcurve_rl":
-          return triangleWrap(`<path d="M48,88 C48,70 72,72 72,56 C72,48 64,44 60,38" fill="none" stroke="#111827" stroke-width="8.5" stroke-linecap="butt"/>`, triBg);
+          // Matches Page 1 #5: Vertical N-curve going up on left, bending right-down, then straight up on right
+          return triangleWrap(`
+            <path d="M45,87 L45,62 C45,54 53,53 60,61 C66,68 74,67 74,59 L74,42" fill="none" stroke="#111827" stroke-width="8" stroke-linecap="butt" stroke-linejoin="round"/>
+          `, triBg);
         case "warn_dcurve_lr":
-          return triangleWrap(`<path d="M72,88 C72,70 48,72 48,56 C48,48 56,44 60,38" fill="none" stroke="#111827" stroke-width="8.5" stroke-linecap="butt"/>`, triBg);
+          // Matches Page 1 #6: Mirror vertical N-curve going up on right, bending left-down, then straight up on left
+          return triangleWrap(`
+            <path d="M75,87 L75,62 C75,54 67,53 60,61 C54,68 46,67 46,59 L46,42" fill="none" stroke="#111827" stroke-width="8" stroke-linecap="butt" stroke-linejoin="round"/>
+          `, triBg);
         case "warn_rr_guarded":
           return triangleWrap(`<path d="M34,64 L86,64 M34,78 L86,78" stroke="#111827" stroke-width="5"/><polygon points="40,50 43,45 46,50 46,86 40,86" fill="#111827"/><polygon points="57,50 60,45 63,50 63,86 57,86" fill="#111827"/><polygon points="74,50 77,45 80,50 80,86 74,86" fill="#111827"/>`, triBg);
         case "warn_rr_unguarded":
@@ -504,11 +533,37 @@
         case "warn_ped":
           return triangleWrap(`<circle cx="60" cy="46" r="5" fill="#111827"/><path d="M60,52 L58,67 M58,56 L49,63 M58,56 L68,62 M58,67 L50,80 M58,67 L67,80" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/><polygon points="30,86 36,78 41,78 36,86" fill="#111827"/><polygon points="44,86 48,78 53,78 50,86" fill="#111827"/><polygon points="57,86 59,78 64,78 63,86" fill="#111827"/><polygon points="70,86 70,78 75,78 77,86" fill="#111827"/><polygon points="82,86 80,78 85,78 89,86" fill="#111827"/>`, triBg);
         case "warn_drawbridge":
-          return triangleWrap(`<rect x="32" y="68" width="12" height="18" fill="#111827"/><path d="M42,72 L72,48" stroke="#111827" stroke-width="6" stroke-linecap="round"/><line x1="36" y1="68" x2="62" y2="55" stroke="#111827" stroke-width="2.5"/><rect x="74" y="78" width="14" height="8" fill="#111827"/><path d="M46,84 Q53,80 60,84 Q67,88 74,84" fill="none" stroke="#111827" stroke-width="3"/>`, triBg);
+          return triangleWrap(`<polygon points="32,76 44,76 44,84 32,84" fill="#111827"/><path d="M40,76 L72,46" stroke="#111827" stroke-width="6" stroke-linecap="butt"/><path d="M40,60 A18,18 0 0,1 58,76" fill="none" stroke="#111827" stroke-width="3"/><polygon points="74,76 88,76 88,84 74,84" fill="#111827"/><path d="M44,81 Q52,77 60,81 Q68,85 74,81 M44,86 Q52,82 60,86 Q68,90 74,86" fill="none" stroke="#111827" stroke-width="2.5"/>`, triBg);
         case "warn_verges":
-          return triangleWrap(`<path d="M28,80 L56,80 L62,88 L92,88" fill="none" stroke="#111827" stroke-width="4.5"/><g transform="translate(54,66) rotate(20)"><rect x="-14" y="-8" width="28" height="13" rx="3" fill="#111827"/><rect x="-10" y="-6" width="20" height="5" fill="${triBg}"/><circle cx="-9" cy="7" r="3" fill="#111827"/><circle cx="9" cy="7" r="3" fill="#111827"/></g><circle cx="72" cy="81" r="2" fill="#111827"/><circle cx="79" cy="83" r="2" fill="#111827"/>`, triBg);
+          // Matches Page 1 #14 DANGEROUS VERGES: Raised road on left, car tilting clockwise into soft right-hand shoulder/verge
+          return triangleWrap(`
+            <polygon points="32,77 67,77 70,83 32,83" fill="#111827"/>
+            <path d="M66,78 L71,85 L90,85" fill="none" stroke="#111827" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="84" cy="80" r="2" fill="#111827"/>
+            <circle cx="77" cy="77" r="2" fill="#111827"/>
+            <g transform="translate(58,62) rotate(18)">
+              <path d="M-15,-4 L-11,-13 L11,-13 L15,-4 L17,-2 L17,6 L-17,6 L-17,-2 Z" fill="#111827"/>
+              <polygon points="-9,-11 9,-11 12,-5 -12,-5" fill="${triBg}"/>
+              <circle cx="-12" cy="1" r="2.2" fill="${triBg}"/>
+              <circle cx="12" cy="1" r="2.2" fill="${triBg}"/>
+              <rect x="-15" y="6" width="5" height="6" rx="1" fill="#111827"/>
+              <rect x="10" y="6" width="5" height="6" rx="1" fill="#111827"/>
+            </g>
+          `, triBg);
         case "warn_slippery":
-          return triangleWrap(`<rect x="46" y="45" width="28" height="16" rx="3" fill="#111827"/><rect x="50" y="47" width="20" height="6" fill="${triBg}"/><circle cx="50" cy="63" r="3" fill="#111827"/><circle cx="70" cy="63" r="3" fill="#111827"/><path d="M38,86 C58,78 44,72 52,65 M68,86 C86,78 64,72 72,65" fill="none" stroke="#111827" stroke-width="3.5" stroke-linecap="round"/>`, triBg);
+          // Matches Page 1 #15 SLIPPERY ROAD: Upright car with two parallel S-curving skid tracks sweeping right then down-left
+          return triangleWrap(`
+            <g transform="translate(60,49)">
+              <path d="M-14,-2 L-10,-10 L10,-10 L14,-2 L16,0 L16,7 L-16,7 L-16,0 Z" fill="#111827"/>
+              <polygon points="-8,-8 8,-8 11,-2 -11,-2" fill="${triBg}"/>
+              <circle cx="-11" cy="2.5" r="2" fill="${triBg}"/>
+              <circle cx="11" cy="2.5" r="2" fill="${triBg}"/>
+              <rect x="-14" y="7" width="4.5" height="5" rx="1" fill="#111827"/>
+              <rect x="9.5" y="7" width="4.5" height="5" rx="1" fill="#111827"/>
+            </g>
+            <path d="M48,61 C48,67 63,69 62,74 C61,79 44,82 35,86" fill="none" stroke="#111827" stroke-width="3.8" stroke-linecap="round"/>
+            <path d="M72,61 C72,67 80,69 78,74 C76,79 60,82 52,86" fill="none" stroke="#111827" stroke-width="3.8" stroke-linecap="round"/>
+          `, triBg);
         case "warn_downgrade":
           return triangleWrap(`<polygon points="28,56 90,88 28,88" fill="#111827"/><g transform="translate(64,62) rotate(26)"><text x="0" y="0" font-size="15" font-weight="900" fill="#111827" text-anchor="middle">10%</text></g>`, triBg);
         case "warn_upgrade":
@@ -522,22 +577,47 @@
         case "warn_school":
           return triangleWrap(`<circle cx="52" cy="50" r="4.5" fill="#111827"/><path d="M52,55 L50,70 L43,84 M50,70 L57,84 M43,62 L60,64" stroke="#111827" stroke-width="4" stroke-linecap="round"/><circle cx="69" cy="56" r="4" fill="#111827"/><path d="M69,60 L68,73 L62,85 M68,73 L75,85 M60,64 L76,68" stroke="#111827" stroke-width="3.5" stroke-linecap="round"/>`, triBg);
         case "warn_cow":
-          return triangleWrap(`<path d="M36,62 L44,56 L46,60 L74,60 L78,74 L74,74 L74,86 L70,86 L70,74 L50,74 L50,86 L46,86 L46,74 L42,68 L36,68 Z" fill="#111827"/>`, triBg);
+          // Detailed standing cow silhouette facing left
+          return triangleWrap(`
+            <path d="M35,62 L40,56 L43,55 L44,58 L48,59 L74,59 C78,59 80,62 80,66 L80,85 L76,85 L75,73 L71,73 L70,85 L66,85 L66,72 L52,72 L51,85 L47,85 L47,73 L44,85 L40,85 L43,69 L39,65 L35,65 Z" fill="#111827"/>
+            <path d="M40,56 L38,52 M43,56 L44,52 M80,62 L83,74" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/>
+          `, triBg);
         case "warn_twoway":
           return triangleWrap(`<path d="M48,48 L48,84 M48,84 L41,74 M48,84 L55,74" fill="none" stroke="#111827" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M72,84 L72,48 M72,48 L65,58 M72,48 L79,58" fill="none" stroke="#111827" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>`, triBg);
         case "warn_roundabout":
-          return triangleWrap(`
-            <path d="M46,60 A16,16 0 0,1 74,60" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
-            <polygon points="75,65 79,55 69,58" fill="#111827"/>
-            <path d="M75,70 A16,16 0 0,1 52,82" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
-            <polygon points="48,79 56,87 57,77" fill="#111827"/>
-            <path d="M46,76 A16,16 0 0,1 46,60" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
-            <polygon points="49,56 41,62 50,65" fill="#111827"/>
-          `, triBg);
+          // Matches Page 1 #24: Three black circular arrows inside warning triangle
+          return triangleWrap(roundaboutArrows(60, 69, 15, "#111827", 5.5, 5.5), triBg);
         case "warn_river":
-          return triangleWrap(`<path d="M30,76 L56,76 L56,88 L90,88" fill="none" stroke="#111827" stroke-width="4"/><rect x="46" y="60" width="22" height="11" rx="2" transform="rotate(28 56 66)" fill="#111827"/><path d="M58,83 Q72,79 86,83" fill="none" stroke="#111827" stroke-width="3"/>`, triBg);
+          // Matches Page 1 #25 RIVER BANK: Side-profile car plunging off left embankment ledge into wavy river water
+          return triangleWrap(`
+            <polygon points="26,73 51,73 51,87 26,87" fill="#111827"/>
+            <path d="M54,80 Q61,76 68,80 T82,80 T92,80 M54,86 Q61,82 68,86 T82,86 T92,86" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+            <g transform="translate(58,59) rotate(32)">
+              <path d="M-16,3 L-16,-3 L-10,-4 L-5,-11 L7,-11 L12,-4 L18,-2 L18,3 Z" fill="#111827"/>
+              <polygon points="-4,-9 5,-9 9,-4 -8,-4" fill="${triBg}"/>
+              <circle cx="-10" cy="4" r="4" fill="#111827" stroke="${triBg}" stroke-width="1.2"/>
+              <circle cx="10" cy="4" r="4" fill="#111827" stroke="${triBg}" stroke-width="1.2"/>
+            </g>
+          `, triBg);
         case "warn_gravel":
-          return triangleWrap(`<rect x="36" y="64" width="24" height="15" rx="3" fill="#111827"/><rect x="39" y="66" width="18" height="5" fill="${triBg}"/><path d="M58,76 L76,64 M58,78 L80,72 M58,80 L78,80" stroke="#111827" stroke-width="2.5" stroke-dasharray="3,3"/><circle cx="75" cy="63" r="2.5" fill="#111827"/><circle cx="82" cy="70" r="2.5" fill="#111827"/><circle cx="80" cy="79" r="2.5" fill="#111827"/>`, triBg);
+          // Matches Page 1 #26 & #38 DANGEROUS UNSTEADY MATERIALS ON THE ROAD: Car on left kicking up spray of gravel stones on right
+          return triangleWrap(`
+            <rect x="28" y="82" width="64" height="4" rx="1" fill="#111827"/>
+            <g transform="translate(46,68)">
+              <path d="M-13,-3 L-9,-11 L9,-11 L13,-3 L15,-1 L15,7 L-15,7 L-15,-1 Z" fill="#111827"/>
+              <polygon points="-7,-9 7,-9 10,-3 -10,-3" fill="${triBg}"/>
+              <circle cx="-10" cy="2" r="1.8" fill="${triBg}"/>
+              <circle cx="10" cy="2" r="1.8" fill="${triBg}"/>
+              <rect x="-13" y="7" width="4.5" height="6" rx="1" fill="#111827"/>
+              <rect x="8.5" y="7" width="4.5" height="6" rx="1" fill="#111827"/>
+            </g>
+            <path d="M58,79 L72,65 M59,80 L79,71 M60,81 L81,78" stroke="#111827" stroke-width="2.2" stroke-linecap="round"/>
+            <polygon points="73,60 77,62 75,66 71,64" fill="#111827"/>
+            <polygon points="81,66 85,68 83,72 79,70" fill="#111827"/>
+            <polygon points="83,74 88,76 86,80 82,78" fill="#111827"/>
+            <circle cx="69" cy="68" r="2" fill="#111827"/>
+            <circle cx="76" cy="75" r="2.2" fill="#111827"/>
+          `, triBg);
         case "warn_rocks":
           return triangleWrap(`<polygon points="76,42 94,86 62,86" fill="#111827"/><polygon points="52,70 57,74 53,78 48,75" fill="#111827"/><polygon points="42,80 48,80 46,86 40,85" fill="#111827"/><circle cx="56" cy="83" r="3" fill="#111827"/>`, triBg);
         case "warn_lights":
@@ -545,9 +625,21 @@
         case "warn_winds":
           return triangleWrap(`<line x1="42" y1="44" x2="42" y2="88" stroke="#111827" stroke-width="4"/><polygon points="44,48 84,56 82,68 44,62" fill="#111827"/><line x1="56" y1="50" x2="56" y2="64" stroke="${triBg}" stroke-width="2.5"/><line x1="69" y1="53" x2="69" y2="66" stroke="${triBg}" stroke-width="2.5"/>`, triBg);
         case "warn_fire":
-          return triangleWrap(`<path d="M58,84 C50,74 54,58 64,48 C64,60 72,56 74,48 C78,60 84,72 72,84 Z" fill="#111827"/><line x1="36" y1="78" x2="56" y2="78" stroke="#111827" stroke-width="4" stroke-linecap="round"/><circle cx="56" cy="78" r="3.5" fill="#111827"/>`, triBg);
+          // Matches Page 1 #30 RISK OF FIRE: Lit matchstick at bottom-left igniting a multi-tongue flame rising on the right
+          return triangleWrap(`
+            <!-- Matchstick & match head -->
+            <rect x="29" y="78" width="22" height="4.5" rx="1.5" fill="#111827"/>
+            <ellipse cx="52" cy="80.2" rx="4.5" ry="3.8" fill="#111827"/>
+            <!-- Multi-tongue flame rising from match head -->
+            <path d="M51,76 C45,67 48,55 57,49 C55,56 59,58 62,53 C63,46 69,40 73,37 C71,45 75,51 77,54 C80,49 84,47 85,44 C86,54 85,66 79,74 C83,72 86,70 88,67 C87,76 80,84 68,85 C58,85 53,82 51,76 Z" fill="#111827"/>
+            <path d="M57,77 C54,71 57,63 63,59 C62,65 66,66 69,60 C70,66 73,70 72,76 C70,80 62,81 57,77 Z" fill="${triBg}"/>
+          `, triBg);
         case "warn_deer":
-          return triangleWrap(`<path d="M44,54 L50,48 M46,54 L42,48 M44,54 L50,62 L72,62 L78,76 L74,76 L70,66 L52,66 L44,80 L40,78 L47,65 Z" fill="#111827"/>`, triBg);
+          // Matches Page 1 #31 WILD ANIMALS: Leaping stag/deer silhouette with antlers facing left
+          return triangleWrap(`
+            <path d="M40,56 L47,54 L52,47 L56,49 L52,58 L74,62 C78,63 80,66 79,70 L86,83 L82,85 L75,73 L69,84 L65,82 L71,70 L53,68 L44,82 L40,80 L48,67 L38,73 L35,70 L46,62 L40,59 Z" fill="#111827"/>
+            <path d="M52,48 L56,39 M54,44 L60,43 M53,46 L48,41" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/>
+          `, triBg);
         case "warn_danger":
           return triangleWrap(`<rect x="55" y="44" width="10" height="28" rx="4" fill="#111827"/><circle cx="60" cy="82" r="5.5" fill="#111827"/>`, triBg);
         case "warn_work":
@@ -576,7 +668,7 @@
         </svg>`;
       }
 
-      // --- PRIORITY & RIGHT OF WAY (MATCHING EXACT SCREENSHOT GEOMETRY) ---
+      // --- PRIORITY & RIGHT OF WAY ---
       if (t === "prio_crossroads") {
         return triangleWrap(`<path d="M42,52 L78,84 M78,52 L42,84" stroke="#111827" stroke-width="8.5" stroke-linecap="butt"/>`);
       }
@@ -648,7 +740,7 @@
         </svg>`;
       }
 
-      // --- PROHIBITION CIRCLES (FIXED: NO SLASHES ON PEDESTRIAN, BICYCLE, MOTORCYCLE, OR MOTOR VEHICLE!) ---
+      // --- PROHIBITION CIRCLES ---
       if (t === "proh_speed50") return redCircleWrap(`<text x="60" y="75" font-size="44" font-weight="900" fill="#111827" text-anchor="middle">50</text>`);
       if (t === "proh_all_vehicles") return redCircleWrap(``);
       if (t === "proh_no_entry") {
@@ -658,7 +750,6 @@
         </svg>`;
       }
       if (t === "proh_no_horn") {
-        // Bugle horn WITH diagonal red slash (matches Page 1 screenshot)
         return redCircleWrap(`
           <path d="M28,46 C36,48 44,54 58,54 L80,54 L80,60 L58,60 C44,60 36,66 28,68 Z" fill="#111827"/>
           <ellipse cx="58" cy="62" rx="12" ry="5" fill="none" stroke="#111827" stroke-width="3.5"/>
@@ -666,14 +757,12 @@
         `, true);
       }
       if (t === "proh_no_ped") {
-        // Walking pedestrian silhouette inside red circle — NO SLASH!
         return redCircleWrap(`
           <circle cx="60" cy="35" r="6.5" fill="#111827"/>
           <path d="M60,43 L58,64 M59,47 L46,60 M59,47 L72,58 M58,64 L47,86 M58,64 L70,86" stroke="#111827" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
         `, false);
       }
       if (t === "proh_no_bike") {
-        // Bicycle silhouette inside red circle — NO SLASH!
         return redCircleWrap(`
           <circle cx="41" cy="67" r="11" fill="none" stroke="#111827" stroke-width="4"/>
           <circle cx="79" cy="67" r="11" fill="none" stroke="#111827" stroke-width="4"/>
@@ -682,7 +771,6 @@
         `, false);
       }
       if (t === "proh_no_moto") {
-        // Motorcycle + rider silhouette inside red circle — NO SLASH!
         return redCircleWrap(`
           <circle cx="41" cy="69" r="10" fill="none" stroke="#111827" stroke-width="4.5"/>
           <circle cx="79" cy="69" r="10" fill="none" stroke="#111827" stroke-width="4.5"/>
@@ -693,7 +781,6 @@
         `, false);
       }
       if (t === "proh_no_motor_veh") {
-        // Front-facing black passenger car ONLY inside red circle — NO SLASH!
         return redCircleWrap(`
           <path d="M36,56 L43,42 L77,42 L84,56 L87,58 L87,72 L33,72 L33,58 Z" fill="#111827"/>
           <polygon points="45,45 75,45 80,55 40,55" fill="#ffffff"/>
@@ -705,7 +792,6 @@
         `, false);
       }
       if (t === "proh_no_passing") {
-        // Red car on left + black car on right (front/rear silhouettes with windshields and wheels)
         return redCircleWrap(`
           <g transform="translate(25,44)">
             <path d="M3,12 L7,3 L25,3 L29,12 L31,14 L31,24 L1,24 L1,14 Z" fill="#dc2626"/>
@@ -722,7 +808,6 @@
         `, false);
       }
       if (t === "proh_no_trucks") {
-        // Side-profile black cargo truck inside red circle — NO SLASH!
         return redCircleWrap(`
           <path d="M28,66 L28,53 L34,46 L46,46 L46,66 Z" fill="#111827"/>
           <polygon points="31,54 35,48 43,48 43,54" fill="#ffffff"/>
@@ -733,7 +818,6 @@
         `, false);
       }
       if (t === "proh_min_dist") {
-        // Two cars with 70 m and double-ended arrow between them
         return redCircleWrap(`
           <text x="60" y="44" font-size="16" font-weight="900" fill="#111827" text-anchor="middle">70 m</text>
           <path d="M46,52 L74,52 M51,48 L45,52 L51,56 M69,48 L75,52 L69,56" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -746,7 +830,6 @@
         `, false);
       }
       if (t === "proh_max_len") {
-        // Side-profile cargo truck at top + <- 10 m -> below it
         return redCircleWrap(`
           <path d="M28,58 L28,46 L34,40 L45,40 L45,58 Z" fill="#111827"/>
           <polygon points="31,47 35,42 42,42 42,47" fill="#ffffff"/>
@@ -757,110 +840,34 @@
           <path d="M28,79 L40,79 M33,75 L27,79 L33,83 M92,79 L80,79 M87,75 L93,79 L87,83" fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         `, false);
       }
-
-      // --- RAILROAD CROSSBUCKS (FIXED TO MATCH EXACT DOUBLE-X PDF ARTWORK) ---
-      if (t === "rr_single") {
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <g transform="translate(60,60)">
-            ${crossbuckArm(26)}
-            ${crossbuckArm(-26)}
-          </g>
-        </svg>`;
-      }
-      if (t === "rr_multi") {
-        // Two stacked St. Andrew's X crossbucks matching the exact overlap on the study guide
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <!-- Upper X Crossbuck -->
-          <g transform="translate(60,36) scale(0.82)">
-            ${crossbuckArm(26)}
-            ${crossbuckArm(-26)}
-          </g>
-          <!-- Lower X Crossbuck -->
-          <g transform="translate(60,72) scale(1.04)">
-            ${crossbuckArm(26)}
-            ${crossbuckArm(-26)}
-          </g>
-        </svg>`;
-      }
-
-      // --- PRIORITY & RIGHT OF WAY ---
-      if (t === "prio_crossroads") {
-        return triangleWrap(`<path d="M42,52 L78,84 M78,52 L42,84" stroke="#111827" stroke-width="8" stroke-linecap="round"/>`);
-      }
-      if (t === "prio_yield_oncoming") {
+      if (t === "proh_max_width") {
+        // Matches Page 2 #65: Left/right inward triangles + large '2', superscript 'm', and ',30' below
         return redCircleWrap(`
-          <path d="M44,32 L44,82 M44,82 L34,70 M44,82 L54,70" fill="none" stroke="#111827" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M76,88 L76,38 M76,38 L66,50 M76,38 L86,50" fill="none" stroke="#dc2626" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <polygon points="18,48 31,60 18,72" fill="#111827"/>
+          <polygon points="102,48 89,60 102,72" fill="#111827"/>
+          <text x="45" y="74" font-size="42" font-weight="900" fill="#111827" text-anchor="middle">2</text>
+          <text x="71" y="53" font-size="16" font-weight="900" fill="#111827" text-anchor="middle">m</text>
+          <text x="71" y="73" font-size="20" font-weight="900" fill="#111827" text-anchor="middle">,30</text>
         `);
       }
-      if (t === "prio_yield") {
-        return `<svg viewBox="0 0 120 110" class="w-full h-full">
-          <polygon points="10,14 110,14 60,100" fill="#ffffff" stroke="#dc2626" stroke-width="12" stroke-linejoin="round"/>
-        </svg>`;
+      if (t === "proh_max_height") {
+        // Matches Page 2 #66: Top/bottom inward triangles + large '3', superscript 'm', and ',50' below
+        return redCircleWrap(`
+          <polygon points="48,18 60,31 72,18" fill="#111827"/>
+          <polygon points="48,102 60,89 72,102" fill="#111827"/>
+          <text x="45" y="74" font-size="42" font-weight="900" fill="#111827" text-anchor="middle">3</text>
+          <text x="71" y="53" font-size="16" font-weight="900" fill="#111827" text-anchor="middle">m</text>
+          <text x="71" y="73" font-size="20" font-weight="900" fill="#111827" text-anchor="middle">,50</text>
+        `);
       }
-      if (t === "prio_stop") {
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <polygon points="38,8 82,8 112,38 112,82 82,112 38,112 8,82 8,38" fill="#dc2626" stroke="#ffffff" stroke-width="5"/>
-          <text x="60" y="71" font-size="31" font-weight="900" fill="#ffffff" text-anchor="middle">STOP</text>
-        </svg>`;
+      if (t === "proh_max_weight") {
+        // Matches Page 2 #67: Large '7', superscript 't', and ',00' below
+        return redCircleWrap(`
+          <text x="45" y="75" font-size="44" font-weight="900" fill="#111827" text-anchor="middle">7</text>
+          <text x="71" y="53" font-size="17" font-weight="900" fill="#111827" text-anchor="middle">t</text>
+          <text x="71" y="74" font-size="20" font-weight="900" fill="#111827" text-anchor="middle">,00</text>
+        `);
       }
-      if (t === "prio_diamond") {
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <polygon points="60,8 112,60 60,112 8,60" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
-          <polygon points="60,22 98,60 60,98 22,60" fill="#facc15" stroke="#1e293b" stroke-width="2"/>
-        </svg>`;
-      }
-      if (t === "prio_diamond_end") {
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <polygon points="60,8 112,60 60,112 8,60" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
-          <polygon points="60,22 98,60 60,98 22,60" fill="#facc15" stroke="#1e293b" stroke-width="2"/>
-          <line x1="88" y1="22" x2="22" y2="88" stroke="#111827" stroke-width="12"/>
-        </svg>`;
-      }
-      if (t === "prio_intersect_minor") {
-        return triangleWrap(`<path d="M60,88 L60,44" stroke="#111827" stroke-width="9" stroke-linecap="round"/><polygon points="51,48 60,34 69,48" fill="#111827"/><line x1="40" y1="68" x2="80" y2="68" stroke="#111827" stroke-width="5"/>`);
-      }
-      if (t === "prio_junc_r") {
-        return triangleWrap(`<path d="M60,88 L60,44" stroke="#111827" stroke-width="9" stroke-linecap="round"/><polygon points="51,48 60,34 69,48" fill="#111827"/><line x1="60" y1="68" x2="82" y2="68" stroke="#111827" stroke-width="5"/>`);
-      }
-      if (t === "prio_junc_l") {
-        return triangleWrap(`<path d="M60,88 L60,44" stroke="#111827" stroke-width="9" stroke-linecap="round"/><polygon points="51,48 60,34 69,48" fill="#111827"/><line x1="38" y1="68" x2="60" y2="68" stroke="#111827" stroke-width="5"/>`);
-      }
-      if (t === "prio_merge_r") {
-        return triangleWrap(`<path d="M60,88 L60,44" stroke="#111827" stroke-width="9" stroke-linecap="round"/><polygon points="51,48 60,34 69,48" fill="#111827"/><line x1="60" y1="64" x2="80" y2="84" stroke="#111827" stroke-width="5" stroke-linecap="round"/>`);
-      }
-      if (t === "prio_merge_l") {
-        return triangleWrap(`<path d="M60,88 L60,44" stroke="#111827" stroke-width="9" stroke-linecap="round"/><polygon points="51,48 60,34 69,48" fill="#111827"/><line x1="60" y1="64" x2="40" y2="84" stroke="#111827" stroke-width="5" stroke-linecap="round"/>`);
-      }
-      if (t === "prio_oncoming_wait") {
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <rect x="12" y="12" width="96" height="96" rx="10" fill="#1d4ed8" stroke="#ffffff" stroke-width="4"/>
-          <path d="M42,30 L42,84 M42,84 L32,72 M42,84 L52,72" fill="none" stroke="#dc2626" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M78,90 L78,34 M78,34 L66,48 M78,34 L90,48" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>`;
-      }
-
-      // --- PROHIBITION CIRCLES ---
-      if (t === "proh_speed50") return redCircleWrap(`<text x="60" y="74" font-size="42" font-weight="900" fill="#111827" text-anchor="middle">50</text>`);
-      if (t === "proh_all_vehicles") return redCircleWrap(``);
-      if (t === "proh_no_entry") {
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <circle cx="60" cy="60" r="48" fill="#dc2626" stroke="#ffffff" stroke-width="4"/>
-          <rect x="24" y="48" width="72" height="24" rx="2" fill="#ffffff"/>
-        </svg>`;
-      }
-      if (t === "proh_no_horn") return redCircleWrap(`<path d="M34,56 L52,56 L76,42 L76,78 L52,64 L34,64 Z" fill="#111827"/>`, true);
-      if (t === "proh_no_ped") return redCircleWrap(`<circle cx="60" cy="38" r="6" fill="#111827"/><path d="M60,45 L60,68 M48,54 L72,54 M60,68 L50,86 M60,68 L70,86" stroke="#111827" stroke-width="5" stroke-linecap="round"/>`, true);
-      if (t === "proh_no_bike") return redCircleWrap(`<circle cx="44" cy="70" r="10" fill="none" stroke="#111827" stroke-width="4"/><circle cx="76" cy="70" r="10" fill="none" stroke="#111827" stroke-width="4"/><path d="M44,70 L58,52 L76,70 M54,52 L68,52" fill="none" stroke="#111827" stroke-width="4"/>`, true);
-      if (t === "proh_no_moto") return redCircleWrap(`<circle cx="42" cy="70" r="9" fill="none" stroke="#111827" stroke-width="4"/><circle cx="78" cy="70" r="9" fill="none" stroke="#111827" stroke-width="4"/><path d="M42,70 L58,56 L72,56 L78,70" fill="#111827"/>`, true);
-      if (t === "proh_no_motor_veh") return redCircleWrap(`<rect x="44" y="34" width="32" height="16" rx="4" fill="#111827"/><circle cx="48" cy="80" r="7" fill="none" stroke="#111827" stroke-width="3.5"/><circle cx="72" cy="80" r="7" fill="none" stroke="#111827" stroke-width="3.5"/><line x1="48" y1="80" x2="72" y2="80" stroke="#111827" stroke-width="4"/>`);
-      if (t === "proh_no_passing") return redCircleWrap(`<rect x="30" y="52" width="24" height="18" rx="3" fill="#dc2626"/><rect x="64" y="52" width="24" height="18" rx="3" fill="#111827"/>`);
-      if (t === "proh_no_trucks") return redCircleWrap(`<rect x="32" y="46" width="38" height="22" fill="#111827"/><rect x="72" y="52" width="14" height="16" fill="#111827"/><circle cx="42" cy="72" r="5" fill="#111827"/><circle cx="76" cy="72" r="5" fill="#111827"/>`);
-      if (t === "proh_min_dist") return redCircleWrap(`<rect x="26" y="58" width="22" height="14" rx="2" fill="#111827"/><rect x="72" y="58" width="22" height="14" rx="2" fill="#111827"/><text x="60" y="46" font-size="16" font-weight="900" fill="#111827" text-anchor="middle">70 m</text><line x1="49" y1="64" x2="71" y2="64" stroke="#111827" stroke-width="3"/>`);
-      if (t === "proh_max_len") return redCircleWrap(`<rect x="34" y="40" width="36" height="18" fill="#111827"/><rect x="72" y="45" width="12" height="13" fill="#111827"/><text x="60" y="84" font-size="17" font-weight="900" fill="#111827" text-anchor="middle">10 m</text><line x1="34" y1="66" x2="86" y2="66" stroke="#111827" stroke-width="3"/>`);
-      if (t === "proh_max_width") return redCircleWrap(`<polygon points="20,60 32,52 32,68" fill="#111827"/><polygon points="100,60 88,52 88,68" fill="#111827"/><text x="60" y="68" font-size="22" font-weight="900" fill="#111827" text-anchor="middle">2,30m</text>`);
-      if (t === "proh_max_height") return redCircleWrap(`<polygon points="60,20 52,32 68,32" fill="#111827"/><polygon points="60,100 52,88 68,88" fill="#111827"/><text x="60" y="68" font-size="22" font-weight="900" fill="#111827" text-anchor="middle">3,50m</text>`);
-      if (t === "proh_max_weight") return redCircleWrap(`<text x="60" y="68" font-size="25" font-weight="900" fill="#111827" text-anchor="middle">7,00t</text>`);
       if (t === "proh_max_axle") return redCircleWrap(`<text x="60" y="46" font-size="22" font-weight="900" fill="#111827" text-anchor="middle">7,0</text><path d="M60,50 L60,64 M54,58 L60,65 L66,58" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/><line x1="34" y1="76" x2="86" y2="76" stroke="#111827" stroke-width="5"/><rect x="34" y="67" width="5" height="18" fill="#111827"/><rect x="42" y="67" width="5" height="18" fill="#111827"/><rect x="73" y="67" width="5" height="18" fill="#111827"/><rect x="81" y="67" width="5" height="18" fill="#111827"/>`);
       if (t === "proh_police") return redCircleWrap(`<line x1="24" y1="60" x2="96" y2="60" stroke="#111827" stroke-width="6"/><text x="60" y="48" font-size="15" font-weight="900" fill="#111827" text-anchor="middle">ALT</text><text x="60" y="80" font-size="14" font-weight="900" fill="#111827" text-anchor="middle">POLIZIA</text>`);
       if (t === "proh_customs") return redCircleWrap(`<line x1="24" y1="60" x2="96" y2="60" stroke="#111827" stroke-width="6"/><text x="60" y="48" font-size="13" font-weight="900" fill="#111827" text-anchor="middle">DOGANA</text><text x="60" y="80" font-size="13" font-weight="900" fill="#111827" text-anchor="middle">DOUANE</text>`);
@@ -868,7 +875,23 @@
       // --- END OF PROHIBITION CIRCLES ---
       if (t === "end_all_limits") return endCircleWrap(``);
       if (t === "end_speed_50") return endCircleWrap(`<text x="60" y="74" font-size="40" font-weight="900" fill="#94a3b8" text-anchor="middle">50</text>`);
-      if (t === "end_no_overtaking") return endCircleWrap(`<rect x="30" y="52" width="24" height="18" rx="3" fill="#94a3b8"/><rect x="64" y="52" width="24" height="18" rx="3" fill="#64748b"/>`);
+      if (t === "end_no_overtaking") {
+        // Matches Page 2 #73: Two detailed gray cars (with windshields & wheels) crossed by diagonal black band
+        return endCircleWrap(`
+          <g transform="translate(24,44)">
+            <path d="M3,12 L7,3 L25,3 L29,12 L31,14 L31,24 L1,24 L1,14 Z" fill="#94a3b8"/>
+            <polygon points="8,5 24,5 27,12 5,12" fill="#ffffff"/>
+            <rect x="3" y="24" width="5" height="6" rx="1" fill="#94a3b8"/>
+            <rect x="24" y="24" width="5" height="6" rx="1" fill="#94a3b8"/>
+          </g>
+          <g transform="translate(64,44)">
+            <path d="M3,12 L7,3 L25,3 L29,12 L31,14 L31,24 L1,24 L1,14 Z" fill="#64748b"/>
+            <polygon points="8,5 24,5 27,12 5,12" fill="#ffffff"/>
+            <rect x="3" y="24" width="5" height="6" rx="1" fill="#64748b"/>
+            <rect x="24" y="24" width="5" height="6" rx="1" fill="#64748b"/>
+          </g>
+        `);
+      }
 
       // --- PARKING & STOPPING ---
       if (t === "proh_no_parking") {
@@ -898,22 +921,32 @@
       if (t === "mand_straight_r") return blueCircleWrap(`<path d="M52,92 L52,30 M52,30 L38,44 M52,30 L66,44 M52,62 L88,62 M88,62 L74,50 M88,62 L74,74" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`);
       if (t === "mand_straight_l") return blueCircleWrap(`<path d="M68,92 L68,30 M68,30 L54,44 M68,30 L82,44 M68,62 L32,62 M32,62 L46,50 M32,62 L46,74" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`);
       if (t === "mand_roundabout") {
-        return blueCircleWrap(`
-          <path d="M40,46 A24,24 0 0,1 80,46" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-          <polygon points="82,53 86,40 74,44" fill="#ffffff"/>
-          <path d="M83,64 A24,24 0 0,1 48,82" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-          <polygon points="43,78 53,88 55,75" fill="#ffffff"/>
-          <path d="M38,72 A24,24 0 0,1 38,48" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-          <polygon points="43,43 32,50 44,54" fill="#ffffff"/>
-        `);
+        // Matches Page 2 #82: Three symmetrical white circular arrows inside mandatory blue circle
+        return blueCircleWrap(roundaboutArrows(60, 60, 24, "#ffffff", 7.5, 7));
       }
       if (t === "mand_min_speed") return blueCircleWrap(`<text x="60" y="75" font-size="44" font-weight="900" fill="#ffffff" text-anchor="middle">30</text>`);
       if (t === "mand_min_speed_end") return blueCircleWrap(`<text x="60" y="75" font-size="44" font-weight="900" fill="#ffffff" text-anchor="middle">30</text>`, true);
       if (t === "mand_chains") {
+        // Matches Page 2 #85 SNOW CHAINS MANDATORY: 3/4-profile tire with ladder chain links across tread on left and side-ring chains on right
         return blueCircleWrap(`
-          <ellipse cx="60" cy="60" rx="22" ry="32" fill="none" stroke="#ffffff" stroke-width="6"/>
-          <ellipse cx="60" cy="60" rx="10" ry="18" fill="none" stroke="#ffffff" stroke-width="3"/>
-          <path d="M39,46 L81,46 M38,60 L82,60 M39,74 L81,74 M42,36 L78,56 M42,56 L78,76 M78,36 L42,56 M78,56 L42,76" stroke="#ffffff" stroke-width="2.5"/>
+          <!-- Tire outer 3D silhouette (tread on left, sidewall ellipse on right) -->
+          <path d="M48,24 L66,24 A20,36 0 0,1 66,96 L48,96 A20,36 0 0,1 48,24 Z" fill="#1d4ed8" stroke="#ffffff" stroke-width="3.5"/>
+          <!-- Sidewall division & inner wheel rim on right -->
+          <ellipse cx="66" cy="60" rx="18" ry="36" fill="#1d4ed8" stroke="#ffffff" stroke-width="3"/>
+          <ellipse cx="67" cy="60" rx="12" ry="25" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="3,3"/>
+          <ellipse cx="68" cy="60" rx="6.5" ry="14" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+          <!-- Sidewall radial chain connectors -->
+          <path d="M55,31 L63,37 M50,43 L60,46 M48,60 L60,60 M50,77 L60,74 M55,89 L63,83 M73,37 L80,32 M75,48 L83,46 M75,60 L84,60 M75,72 L83,74 M73,83 L80,88" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          <!-- Horizontal chain link bands across the left tire tread -->
+          <g fill="none" stroke="#ffffff" stroke-width="2">
+            <rect x="36" y="31" width="6" height="3.5" rx="1.5"/><rect x="43" y="31" width="6" height="3.5" rx="1.5"/><rect x="50" y="31" width="5" height="3.5" rx="1.5"/>
+            <rect x="32" y="41" width="6" height="3.5" rx="1.5"/><rect x="39" y="41" width="6" height="3.5" rx="1.5"/><rect x="46" y="41" width="5" height="3.5" rx="1.5"/>
+            <rect x="30" y="51" width="6" height="3.5" rx="1.5"/><rect x="37" y="51" width="6" height="3.5" rx="1.5"/><rect x="44" y="51" width="5" height="3.5" rx="1.5"/>
+            <rect x="29" y="60" width="6" height="3.5" rx="1.5"/><rect x="36" y="60" width="6" height="3.5" rx="1.5"/><rect x="43" y="60" width="5" height="3.5" rx="1.5"/>
+            <rect x="30" y="69" width="6" height="3.5" rx="1.5"/><rect x="37" y="69" width="6" height="3.5" rx="1.5"/><rect x="44" y="69" width="5" height="3.5" rx="1.5"/>
+            <rect x="32" y="78" width="6" height="3.5" rx="1.5"/><rect x="39" y="78" width="6" height="3.5" rx="1.5"/><rect x="46" y="78" width="5" height="3.5" rx="1.5"/>
+            <rect x="36" y="86" width="6" height="3.5" rx="1.5"/><rect x="43" y="86" width="6" height="3.5" rx="1.5"/><rect x="50" y="86" width="5" height="3.5" rx="1.5"/>
+          </g>
         `);
       }
       if (t === "mand_ped_lane") return blueCircleWrap(`<circle cx="60" cy="35" r="6.5" fill="#ffffff"/><path d="M60,43 L58,64 M59,47 L46,60 M59,47 L72,58 M58,64 L47,86 M58,64 L70,86" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`);
@@ -926,11 +959,32 @@
           <path d="M79,67 L71,44 L65,44 M53,50 L50,45 M46,45 L55,45" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
         `);
       }
+
+      // --- PAGE 2 ROW 4 & ROW 5 SERVICE / INFO SIGNS ---
+      if (t === "info_school_bus") {
+        // Matches Page 2 #89 SCHOOL BUS: Orange square sign with two running school children + schoolbag
+        return `<svg viewBox="0 0 120 120" class="w-full h-full">
+          <rect x="12" y="12" width="96" height="96" rx="6" fill="#ea580c" stroke="#111827" stroke-width="5"/>
+          <!-- Smaller child on left with schoolbag -->
+          <circle cx="45" cy="46" r="6" fill="#111827"/>
+          <path d="M45,53 L43,72 L33,88 M43,72 L52,86 M44,58 L32,66 M44,58 L58,64" stroke="#111827" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <rect x="23" y="63" width="12" height="10" rx="1.5" transform="rotate(-18 29 68)" fill="#111827"/>
+          <!-- Larger child on right holding hand -->
+          <circle cx="73" cy="38" r="6.5" fill="#111827"/>
+          <path d="M73,46 L70,68 L59,88 M70,68 L83,84 M71,52 L58,64 M71,52 L86,58" stroke="#111827" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>`;
+      }
       if (t === "info_ped_crossing") {
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
           <rect x="12" y="12" width="96" height="96" rx="8" fill="#1d4ed8" stroke="#ffffff" stroke-width="4"/>
-          <polygon points="60,22 100,94 20,94" fill="#ffffff"/>
-          <circle cx="60" cy="48" r="5" fill="#111827"/><path d="M60,54 L60,72 L50,86 M60,72 L70,86 M48,62 L72,62" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
+          <polygon points="60,20 100,94 20,94" fill="#ffffff"/>
+          <circle cx="60" cy="45" r="5" fill="#111827"/>
+          <path d="M60,51 L58,67 M58,55 L48,62 M58,55 L68,61 M58,67 L49,81 M58,67 L67,81" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
+          <polygon points="28,90 35,81 40,81 35,90" fill="#111827"/>
+          <polygon points="43,90 48,81 53,81 49,90" fill="#111827"/>
+          <polygon points="57,90 60,81 65,81 64,90" fill="#111827"/>
+          <polygon points="71,90 71,81 76,81 78,90" fill="#111827"/>
+          <polygon points="84,90 82,81 87,81 91,90" fill="#111827"/>
         </svg>`;
       }
       if (t === "info_dead_end") {
@@ -962,10 +1016,27 @@
         </svg>`;
       }
       if (t === "info_accident") {
+        // Matches Page 2 #96 ACCIDENT AHEAD: Red vertical sign with overturned white car on left, curved skid arrows, crashing car on right, and collision starburst
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <rect x="16" y="12" width="88" height="96" rx="8" fill="#dc2626" stroke="#ffffff" stroke-width="4"/>
-          <rect x="34" y="40" width="32" height="18" rx="3" transform="rotate(-25 50 49)" fill="#ffffff"/>
-          <rect x="52" y="64" width="32" height="18" rx="3" fill="#ffffff"/>
+          <rect x="16" y="10" width="88" height="100" rx="6" fill="#dc2626" stroke="#ffffff" stroke-width="4"/>
+          <!-- Overturned car on left -->
+          <g transform="translate(38,44) rotate(-18)">
+            <rect x="-11" y="-20" width="22" height="40" rx="5" fill="#ffffff"/>
+            <rect x="-7" y="-12" width="14" height="9" rx="1.5" fill="#dc2626"/>
+            <rect x="-7" y="4" width="14" height="10" rx="1.5" fill="#dc2626"/>
+          </g>
+          <!-- Collision burst rays in center -->
+          <path d="M52,32 L58,42 M66,30 L62,42 M54,70 L60,60 M68,72 L63,60" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+          <!-- Second car crashing horizontally from right -->
+          <g transform="translate(79,53)">
+            <rect x="-18" y="-11" width="34" height="22" rx="4" fill="#ffffff"/>
+            <rect x="-11" y="-8" width="9" height="16" rx="1.5" fill="#dc2626"/>
+            <rect x="3" y="-8" width="8" height="16" rx="1.5" fill="#dc2626"/>
+          </g>
+          <!-- Two curved skid arrows at bottom-left -->
+          <path d="M28,96 C28,82 40,76 52,76 M44,98 C44,88 52,84 64,84" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+          <polygon points="50,71 58,76 50,81" fill="#ffffff"/>
+          <polygon points="62,79 70,84 62,89" fill="#ffffff"/>
         </svg>`;
       }
       if (t === "info_hospital") {
@@ -1124,48 +1195,47 @@
         </svg>`;
       }
       if (t === "lane_merge_1") {
+        // Matches Page 2 #119 MERGING LANES: Left black arrow straight up, right black arrow angled into left lane, solid red boundary line on right (no dashed lines)
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <rect x="20" y="10" width="80" height="100" rx="6" fill="#facc15" stroke="#111827" stroke-width="4"/>
-          <line x1="58" y1="54" x2="58" y2="100" stroke="#111827" stroke-width="3" stroke-dasharray="6,5"/>
-          <path d="M38,96 L38,68 C38,54 58,52 66,42" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/>
-          <polygon points="60,40 71,36 68,47" fill="#111827"/>
-          <path d="M78,96 L78,28" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/>
-          <polygon points="71,32 78,18 85,32" fill="#111827"/>
+          <rect x="20" y="10" width="80" height="100" rx="4" fill="#facc15" stroke="#111827" stroke-width="4"/>
+          <!-- Left straight arrow -->
+          <path d="M42,96 L42,28" fill="none" stroke="#111827" stroke-width="5.5" stroke-linecap="butt"/>
+          <polygon points="35,31 42,18 49,31" fill="#111827"/>
+          <!-- Right merging arrow -->
+          <path d="M72,96 L72,72 L55,54" fill="none" stroke="#111827" stroke-width="5.5" stroke-linecap="butt" stroke-linejoin="round"/>
+          <polygon points="51,60 49,47 61,51" fill="#111827"/>
+          <!-- Solid red closing-lane line on right -->
+          <path d="M56,18 L56,40 L84,68 L84,96" fill="none" stroke="#dc2626" stroke-width="5" stroke-linecap="butt" stroke-linejoin="round"/>
         </svg>`;
       }
       if (t === "lane_merge_2") {
+        // Matches Page 2 #120 MERGING LANES: Solid red line on left + two parallel black arrows shifting right (no dashed lines)
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <rect x="20" y="10" width="80" height="100" rx="6" fill="#facc15" stroke="#111827" stroke-width="4"/>
-          <path d="M48,96 L48,68 L70,44 L70,22" fill="none" stroke="#111827" stroke-width="2.5" stroke-dasharray="5,4"/>
-          <path d="M34,94 L34,68 L56,44 L56,28 M62,94 L62,68 L84,44 L84,28" fill="none" stroke="#111827" stroke-width="5.5" stroke-linecap="round"/>
-          <polygon points="49,31 56,18 63,31" fill="#111827"/>
-          <polygon points="77,31 84,18 91,31" fill="#111827"/>
+          <rect x="20" y="10" width="80" height="100" rx="4" fill="#facc15" stroke="#111827" stroke-width="4"/>
+          <!-- Solid red boundary line on left -->
+          <path d="M30,96 L30,72 L52,40 L52,18" fill="none" stroke="#dc2626" stroke-width="5" stroke-linecap="butt" stroke-linejoin="round"/>
+          <!-- Two parallel black arrows shifting right -->
+          <path d="M46,96 L46,72 L68,40 L68,28 M64,96 L64,72 L86,40 L86,28" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="butt" stroke-linejoin="round"/>
+          <polygon points="61,31 68,18 75,31" fill="#111827"/>
+          <polygon points="79,31 86,18 93,31" fill="#111827"/>
         </svg>`;
       }
       if (t === "lane_carriageway") {
+        // Matches Page 2 #121 MERGING CARRIAGEWAY exact reference:
+        // Two solid black median humps in the center (top & bottom), two parallel angled red lines, and one black arrow crossing from right to left
         return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <rect x="20" y="10" width="80" height="100" rx="6" fill="#facc15" stroke="#111827" stroke-width="4"/>
-          <rect x="55" y="18" width="6" height="24" fill="#111827"/>
-          <rect x="55" y="68" width="6" height="32" fill="#111827"/>
-          <path d="M38,96 L38,72 C38,56 78,56 78,40 L78,26" fill="none" stroke="#111827" stroke-width="5.5" stroke-linecap="round"/>
-          <polygon points="71,30 78,18 85,30" fill="#111827"/>
-          <circle cx="38" cy="30" r="9" fill="#ffffff" stroke="#dc2626" stroke-width="4"/>
-        </svg>`;
-      }
-      if (t === "lane_merge_2") {
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <rect x="20" y="10" width="80" height="100" rx="6" fill="#facc15" stroke="#111827" stroke-width="4"/>
-          <path d="M36,94 L36,68 L56,46 L56,26 M62,94 L62,68 L82,46 L82,26" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
-          <polygon points="50,30 56,18 62,30" fill="#111827"/>
-          <polygon points="76,30 82,18 88,30" fill="#111827"/>
-        </svg>`;
-      }
-      if (t === "lane_carriageway") {
-        return `<svg viewBox="0 0 120 120" class="w-full h-full">
-          <rect x="20" y="10" width="80" height="100" rx="6" fill="#facc15" stroke="#111827" stroke-width="4"/>
-          <line x1="58" y1="18" x2="58" y2="102" stroke="#111827" stroke-width="3" stroke-dasharray="6,4"/>
-          <path d="M38,96 L38,72 L78,44 L78,24" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
-          <circle cx="38" cy="34" r="9" fill="#ffffff" stroke="#dc2626" stroke-width="4"/>
+          <rect x="20" y="10" width="80" height="100" rx="5" fill="#facc15" stroke="#111827" stroke-width="3.5"/>
+          <!-- Top solid black median hump -->
+          <path d="M59,16 L68,16 L68,25 C68,30 63.5,33 63.5,33 C63.5,33 59,30 59,25 Z" fill="#111827"/>
+          <!-- Bottom solid black median hump -->
+          <path d="M57,104 L66,104 L66,95 C66,90 61.5,87 61.5,87 C61.5,87 57,90 57,95 Z" fill="#111827"/>
+          <!-- Left solid red line -->
+          <path d="M45,104 L45,80 L29,38 L29,16" fill="none" stroke="#dc2626" stroke-width="6" stroke-linecap="butt" stroke-linejoin="round"/>
+          <!-- Right solid red line -->
+          <path d="M90,104 L90,80 L74,38 L74,16" fill="none" stroke="#dc2626" stroke-width="6" stroke-linecap="butt" stroke-linejoin="round"/>
+          <!-- Center black arrow crossing from right of bottom hump to left of top hump -->
+          <path d="M77,104 L77,78 L46,47 L46,32" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="butt" stroke-linejoin="round"/>
+          <polygon points="37,35 46,20 55,35" fill="#111827"/>
         </svg>`;
       }
 
